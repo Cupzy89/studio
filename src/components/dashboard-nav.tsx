@@ -20,14 +20,14 @@ export function DashboardNav() {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <Link href="/" legacyBehavior passHref>
+        <Link href="/">
           <SidebarMenuButton isActive={pathname === '/'}>
             <LayoutDashboard /> Dashboard
           </SidebarMenuButton>
         </Link>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <Link href="/inventory" legacyBehavior passHref>
+        <Link href="/inventory">
           <SidebarMenuButton isActive={pathname === '/inventory'}>
             <Warehouse /> Inventory
           </SidebarMenuButton>
