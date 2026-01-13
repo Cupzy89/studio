@@ -12,7 +12,6 @@ import {
   LineChart,
   FileUp,
 } from 'lucide-react';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 export function DashboardNav() {
@@ -20,42 +19,34 @@ export function DashboardNav() {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <Link href="/">
-          <SidebarMenuButton isActive={pathname === '/'} asChild>
-            <span className="flex w-full items-center gap-2">
-              <LayoutDashboard /> Dashboard
-            </span>
-          </SidebarMenuButton>
-        </Link>
+        <SidebarMenuButton
+          href="/"
+          isActive={pathname === '/'}
+        >
+          <LayoutDashboard /> Dashboard
+        </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <Link href="/inventory">
-          <SidebarMenuButton isActive={pathname === '/inventory'} asChild>
-            <span className="flex w-full items-center gap-2">
-              <Warehouse /> Inventory
-            </span>
-          </SidebarMenuButton>
-        </Link>
+        <SidebarMenuButton
+          href="/inventory"
+          isActive={pathname === '/inventory'}
+        >
+          <Warehouse /> Inventory
+        </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton>
-          <span className="flex w-full items-center gap-2">
             <Truck /> Suppliers
-          </span>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton>
-          <span className="flex w-full items-center gap-2">
             <LineChart /> Analysis
-          </span>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton>
-          <span className="flex w-full items-center gap-2">
             <FileUp /> Upload File
-          </span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
