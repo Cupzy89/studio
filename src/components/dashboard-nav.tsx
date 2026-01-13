@@ -22,30 +22,40 @@ export function DashboardNav() {
       <SidebarMenuItem>
         <Link href="/">
           <SidebarMenuButton isActive={pathname === '/'} asChild>
-            <div><LayoutDashboard /> Dashboard</div>
+            <>
+              <LayoutDashboard /> Dashboard
+            </>
           </SidebarMenuButton>
         </Link>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <Link href="/inventory">
           <SidebarMenuButton isActive={pathname === '/inventory'} asChild>
-            <div><Warehouse /> Inventory</div>
+            <>
+              <Warehouse /> Inventory
+            </>
           </SidebarMenuButton>
         </Link>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton>
-          <Truck /> Suppliers
+          <>
+            <Truck /> Suppliers
+          </>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton>
-          <LineChart /> Analysis
+          <>
+            <LineChart /> Analysis
+          </>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton>
-          <FileUp /> Upload File
+          <>
+            <FileUp /> Upload File
+          </>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
