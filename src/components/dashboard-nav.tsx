@@ -13,16 +13,14 @@ import {
   FileUp,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import { UploadDialog } from './upload-dialog';
 
 export function DashboardNav() {
   const pathname = usePathname();
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <SidebarMenuButton
-          href="/"
-          isActive={pathname === '/'}
-        >
+        <SidebarMenuButton href="/" isActive={pathname === '/'}>
           <LayoutDashboard /> Dashboard
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -36,18 +34,16 @@ export function DashboardNav() {
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton>
-            <Truck /> Suppliers
+          <Truck /> Suppliers
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton>
-            <LineChart /> Analysis
+          <LineChart /> Analysis
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <SidebarMenuButton>
-            <FileUp /> Upload File
-        </SidebarMenuButton>
+        <UploadDialog />
       </SidebarMenuItem>
     </SidebarMenu>
   );
