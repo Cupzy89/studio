@@ -21,15 +21,15 @@ export function DashboardNav() {
     <SidebarMenu>
       <SidebarMenuItem>
         <Link href="/">
-          <SidebarMenuButton isActive={pathname === '/'}>
-            <LayoutDashboard /> Dashboard
+          <SidebarMenuButton isActive={pathname === '/'} asChild>
+            <div><LayoutDashboard /> Dashboard</div>
           </SidebarMenuButton>
         </Link>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <Link href="/inventory">
-          <SidebarMenuButton isActive={pathname === '/inventory'}>
-            <Warehouse /> Inventory
+          <SidebarMenuButton isActive={pathname === '/inventory'} asChild>
+            <div><Warehouse /> Inventory</div>
           </SidebarMenuButton>
         </Link>
       </SidebarMenuItem>
