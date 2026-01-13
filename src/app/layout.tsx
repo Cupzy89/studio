@@ -2,6 +2,31 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarInset,
+  SidebarTrigger,
+} from '@/components/ui/sidebar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import {
+  LayoutDashboard,
+  Warehouse,
+  Truck,
+  LineChart,
+  Settings,
+  FileUp,
+} from 'lucide-react';
+import { Logo } from '@/components/logo';
+import placeholderData from '@/lib/placeholder-images.json';
+import Link from 'next/link';
+import { DashboardNav } from '@/components/dashboard-nav';
 
 export const metadata: Metadata = {
   title: 'RollView',
@@ -13,6 +38,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const userAvatar = placeholderData.placeholderImages.find(
+    (p) => p.id === 'user-avatar'
+  );
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -28,7 +56,42 @@ export default function RootLayout({
         />
       </head>
       <body className={cn('font-body antialiased')}>
-        {children}
+        <SidebarProvider>
+          <Sidebar>
+            <SidebarHeader>
+              <div className="flex items-center gap-2 p-2">
+                <Logo />
+                <h1 className="text-xl font-semibold text-primary">RollView</h1>
+              </div>
+            </SidebarHeader>
+            <SidebarContent>
+              <DashboardNav />
+            </SidebarContent>
+          </Sidebar>
+
+          <SidebarInset>
+            <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background px-4 sm:px-6">
+              <SidebarTrigger />
+              <div className="ml-auto flex items-center gap-4">
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Settings className="h-5 w-5" />
+                  <span className="sr-only">Settings</span>
+                </Button>
+                <Avatar className="h-9 w-9">
+                  {userAvatar && (
+                    <AvatarImage
+                      src={userAvatar.imageUrl}
+                      data-ai-hint={userAvatar.imageHint}
+                    />
+                  )}
+                  <AvatarFallback>AD</AvatarFallback>
+                </Avatar>
+              </div>
+            </header>
+
+            <main className="flex-1 space-y-6 p-4 sm:p-6">{children}</main>
+          </SidebarInset>
+        </SidebarProvider>
         <Toaster />
       </body>
     </html>
