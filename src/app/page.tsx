@@ -20,6 +20,7 @@ import {
   Settings,
   ScrollText,
   AlertTriangle,
+  FileUp,
 } from 'lucide-react';
 import { Logo } from '@/components/logo';
 import { InventoryTable } from '@/components/inventory-table';
@@ -66,6 +67,11 @@ export default function DashboardPage() {
             <SidebarMenuItem>
               <SidebarMenuButton>
                 <LineChart /> Analysis
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton>
+                <FileUp /> Upload File
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
