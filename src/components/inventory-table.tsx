@@ -15,11 +15,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { paperRolls } from '@/lib/data';
+import { useInventory } from '@/context/inventory-context';
 import type { PaperRoll } from '@/lib/types';
 import { ScrollText, AlertTriangle } from 'lucide-react';
 
 export function InventoryTable() {
+  const { paperRolls } = useInventory();
+
   return (
     <Card>
       <CardHeader>

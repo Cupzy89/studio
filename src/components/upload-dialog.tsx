@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,14 +9,24 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from '@/components/ui/dialog';
 import { SidebarMenuButton } from '@/components/ui/sidebar';
 import { FileUp, Download, Upload } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { useInventory } from '@/context/inventory-context';
+import * as XLSX from 'xlsx';
+import type { PaperRoll } from '@/lib/types';
 
 export function UploadDialog() {
+  const { toast } = useToast();
+  const { setPaperRolls } = useInventory();
+  const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   const handleDownloadTemplate = () => {
     const headers = [
       'GR date',
@@ -41,6 +52,79 @@ export function UploadDialog() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setFile(event.target.files[0]);
+    }
+  };
+
+  const handleUpload = () => {
+    if (!file) {
+      toast({
+        variant: 'destructive',
+        title: 'Tidak Ada File Terpilih',
+        description: 'Silakan pilih file untuk diunggah.',
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const json: any[] = XLSX.utils.sheet_to_json(worksheet);
+
+        const newPaperRolls: PaperRoll[] = json.map((row: any, index: number) => {
+          // Basic validation and mapping
+          const name = row['Part No'] || `Gulungan Tanpa Nama ${index + 1}`;
+          const type = row['Kind'] || 'Uncoated';
+          const quantity = Number(row['Qty']) || 0;
+          
+          return {
+            id: row['SU No'] || `R${String(index + 1).padStart(3, '0')}`,
+            name,
+            type,
+            quantity,
+            reorderLevel: 50, // Default value
+            lastUpdated: new Date().toISOString(),
+          };
+        });
+
+        setPaperRolls(newPaperRolls);
+        toast({
+          title: 'Unggah Berhasil',
+          description: `${newPaperRolls.length} item inventaris telah berhasil dimuat.`,
+        });
+      } catch (error) {
+        console.error("Gagal mem-parsing file:", error);
+        toast({
+          variant: 'destructive',
+          title: 'Unggah Gagal',
+          description: 'Gagal mem-parsing file. Pastikan formatnya benar.',
+        });
+      } finally {
+        setIsUploading(false);
+        setFile(null);
+      }
+    };
+
+    reader.onerror = () => {
+        console.error("Gagal membaca file:", reader.error);
+        toast({
+            variant: 'destructive',
+            title: 'Gagal Membaca File',
+            description: 'Terjadi kesalahan saat membaca file.',
+        });
+        setIsUploading(false);
+    }
+
+    reader.readAsArrayBuffer(file);
   };
 
   return (
@@ -76,8 +160,10 @@ export function UploadDialog() {
               </Button>
             </div>
             <div>
-              <p className="text-sm font-medium text-foreground">
-                Buatkan template excel, didalamnya terdapat kolom, GR date, Part No, Kind, Gsm, Width, SU No, Qty, Roll-Cnt, storage Bin, Aging, Batch, Diameter (Cm), Length, Vendor Name
+              <p className="text-xs font-medium text-foreground">
+                Buatkan template excel, didalamnya terdapat kolom, GR date, Part
+                No, Kind, Gsm, Width, SU No, Qty, Roll-Cnt, storage Bin, Aging,
+                Batch, Diameter (Cm), Length, Vendor Name
               </p>
             </div>
           </div>
@@ -85,7 +171,7 @@ export function UploadDialog() {
           <div className="grid w-full max-w-sm items-center gap-2">
             <Label htmlFor="inventory-file">Unggah File Data</Label>
             <div className="flex items-center gap-2">
-              <Input id="inventory-file" type="file" className="flex-grow" />
+              <Input id="inventory-file" type="file" className="flex-grow" accept=".xlsx, .csv" onChange={handleFileChange} />
             </div>
             <p className="text-xs text-muted-foreground">
               Mendukung file .xlsx, .csv hingga 5MB.
@@ -93,9 +179,21 @@ export function UploadDialog() {
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit">
-            <Upload className="mr-2 h-4 w-4" />
-            Unggah
+          <DialogClose asChild>
+            <Button variant="outline">Batal</Button>
+          </DialogClose>
+          <Button onClick={handleUpload} disabled={isUploading || !file}>
+            {isUploading ? (
+              <>
+                <Upload className="mr-2 h-4 w-4 animate-pulse" />
+                Mengunggah...
+              </>
+            ) : (
+              <>
+                <Upload className="mr-2 h-4 w-4" />
+                Unggah
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

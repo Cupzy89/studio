@@ -1,3 +1,5 @@
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ScrollText,
@@ -7,9 +9,11 @@ import {
 import { InventoryTable } from '@/components/inventory-table';
 import { UsageChart } from '@/components/usage-chart';
 import { OrderOptimizer } from '@/components/order-optimizer';
-import { paperRolls, suppliers } from '@/lib/data';
+import { suppliers } from '@/lib/data';
+import { useInventory } from '@/context/inventory-context';
 
 export default function DashboardPage() {
+  const { paperRolls } = useInventory();
   const totalStock = paperRolls.reduce((sum, roll) => sum + roll.quantity, 0);
   const lowStockItems = paperRolls.filter(
     (roll) => roll.quantity < roll.reorderLevel
