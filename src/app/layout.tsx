@@ -30,7 +30,7 @@ import { DashboardNav } from '@/components/dashboard-nav';
 
 export const metadata: Metadata = {
   title: 'RollView',
-  description: 'A dashboard for managing paper roll inventory.',
+  description: 'Sebuah dasbor untuk mengelola inventaris gulungan kertas.',
 };
 
 export default function RootLayout({
@@ -42,7 +42,7 @@ export default function RootLayout({
     (p) => p.id === 'user-avatar'
   );
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="id" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -75,7 +75,7 @@ export default function RootLayout({
               <div className="ml-auto flex items-center gap-4">
                 <Button variant="ghost" size="icon" className="h-8 w-8">
                   <Settings className="h-5 w-5" />
-                  <span className="sr-only">Settings</span>
+                  <span className="sr-only">Pengaturan</span>
                 </Button>
                 <Avatar className="h-9 w-9">
                   {userAvatar && (

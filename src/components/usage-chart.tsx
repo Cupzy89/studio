@@ -15,39 +15,62 @@ import {
   ChartLegendContent,
 } from '@/components/ui/chart';
 import { historicalUsage } from '@/lib/data';
+import { useMemo } from 'react';
 
 const chartConfig = {
   Coated: {
-    label: 'Coated',
+    label: 'Dilapisi',
     color: 'hsl(var(--chart-1))',
   },
   Uncoated: {
-    label: 'Uncoated',
+    label: 'Tidak Dilapisi',
     color: 'hsl(var(--chart-2))',
   },
   Specialty: {
-    label: 'Specialty',
+    label: 'Khusus',
     color: 'hsl(var(--chart-3))',
   },
 };
 
+const monthTranslations: { [key: string]: string } = {
+  Jan: 'Jan',
+  Feb: 'Feb',
+  Mar: 'Mar',
+  Apr: 'Apr',
+  May: 'Mei',
+  Jun: 'Jun',
+  Jul: 'Jul',
+  Aug: 'Agu',
+  Sep: 'Sep',
+  Oct: 'Okt',
+  Nov: 'Nov',
+  Dec: 'Des',
+};
+
+
 export function UsageChart() {
+  const translatedData = useMemo(() => {
+    return historicalUsage.map(item => ({
+      ...item,
+      month: monthTranslations[item.month] || item.month,
+    }));
+  }, []);
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Historical Usage Analysis</CardTitle>
-        <CardDescription>Usage over the last 6 months</CardDescription>
+        <CardTitle>Analisis Penggunaan Historis</CardTitle>
+        <CardDescription>Penggunaan selama 6 bulan terakhir</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
-          <BarChart data={historicalUsage} accessibilityLayer>
+          <BarChart data={translatedData} accessibilityLayer>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="month"
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              tickFormatter={(value) => value.slice(0, 3)}
             />
             <YAxis />
             <ChartTooltip
@@ -59,16 +82,19 @@ export function UsageChart() {
               dataKey="Coated"
               fill="var(--color-Coated)"
               radius={[4, 4, 0, 0]}
+              name="Dilapisi"
             />
             <Bar
               dataKey="Uncoated"
               fill="var(--color-Uncoated)"
               radius={[4, 4, 0, 0]}
+              name="Tidak Dilapisi"
             />
             <Bar
               dataKey="Specialty"
               fill="var(--color-Specialty)"
               radius={[4, 4, 0, 0]}
+              name="Khusus"
             />
           </BarChart>
         </ChartContainer>

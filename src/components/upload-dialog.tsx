@@ -20,22 +20,22 @@ export function UploadDialog() {
     <Dialog>
       <DialogTrigger asChild>
         <SidebarMenuButton>
-          <FileUp /> Upload File
+          <FileUp /> Unggah File
         </SidebarMenuButton>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Upload and Manage Data</DialogTitle>
+          <DialogTitle>Unggah dan Kelola Data</DialogTitle>
           <DialogDescription>
-            Upload your inventory data or download the template to get started.
+            Unggah data inventaris Anda atau unduh template untuk memulai.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
           <div className="flex items-center justify-between rounded-lg border p-4">
             <div>
-              <h3 className="font-semibold">Download Template</h3>
+              <h3 className="font-semibold">Unduh Template</h3>
               <p className="text-sm text-muted-foreground">
-                Get the required Excel template for your data.
+                Dapatkan template Excel yang diperlukan untuk data Anda.
               </p>
             </div>
             <Button variant="outline" size="icon">
@@ -44,19 +44,19 @@ export function UploadDialog() {
           </div>
 
           <div className="grid w-full max-w-sm items-center gap-2">
-            <Label htmlFor="inventory-file">Upload Data File</Label>
+            <Label htmlFor="inventory-file">Unggah File Data</Label>
             <div className="flex items-center gap-2">
               <Input id="inventory-file" type="file" className="flex-grow" />
             </div>
              <p className="text-xs text-muted-foreground">
-              Supports .xlsx, .csv files up to 5MB.
+              Mendukung file .xlsx, .csv hingga 5MB.
             </p>
           </div>
         </div>
         <DialogFooter>
           <Button type="submit">
             <Upload className="mr-2 h-4 w-4" />
-            Upload
+            Unggah
           </Button>
         </DialogFooter>
       </DialogContent>

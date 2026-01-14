@@ -40,11 +40,11 @@ export function OrderOptimizer() {
       const optimizedOrders = await optimizePaperRollOrders(aiOptimizationInput);
       setResult(optimizedOrders);
     } catch (error) {
-      console.error('Optimization failed:', error);
+      console.error('Optimasi gagal:', error);
       toast({
         variant: 'destructive',
-        title: 'Optimization Failed',
-        description: 'Could not generate optimized orders. Please try again.',
+        title: 'Optimasi Gagal',
+        description: 'Tidak dapat menghasilkan pesanan yang dioptimalkan. Silakan coba lagi.',
       });
     } finally {
       setLoading(false);
@@ -56,11 +56,10 @@ export function OrderOptimizer() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkles className="text-accent" />
-          AI Order Optimizer
+          Pengoptimal Pesanan AI
         </CardTitle>
         <CardDescription>
-          Use AI to get optimized order suggestions based on your inventory,
-          usage, and supplier data.
+          Gunakan AI untuk mendapatkan saran pesanan yang dioptimalkan berdasarkan inventaris, penggunaan, dan data pemasok Anda.
         </CardDescription>
       </CardHeader>
       <CardContent className="min-h-[150px]">
@@ -68,25 +67,25 @@ export function OrderOptimizer() {
           <div className="flex h-full min-h-[150px] flex-col items-center justify-center rounded-lg border border-dashed">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
             <span className="mt-4 text-muted-foreground">
-              Analyzing data and generating suggestions...
+              Menganalisis data dan menghasilkan saran...
             </span>
           </div>
         )}
         {!loading && !result && (
             <div className="flex h-full min-h-[150px] flex-col items-center justify-center rounded-lg border border-dashed">
                 <Sparkles className="h-12 w-12 text-muted-foreground" />
-                <p className="mt-4 text-sm text-muted-foreground">Click the button to generate order suggestions</p>
+                <p className="mt-4 text-sm text-muted-foreground">Klik tombol untuk menghasilkan saran pesanan</p>
             </div>
         )}
         {result && (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Roll Type</TableHead>
-                <TableHead>Supplier</TableHead>
-                <TableHead className="text-right">Quantity</TableHead>
-                <TableHead className="text-right">Est. Cost</TableHead>
-                <TableHead>Est. Delivery</TableHead>
+                <TableHead>Tipe Gulungan</TableHead>
+                <TableHead>Pemasok</TableHead>
+                <TableHead className="text-right">Kuantitas</TableHead>
+                <TableHead className="text-right">Perk. Biaya</TableHead>
+                <TableHead>Perk. Pengiriman</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -114,12 +113,12 @@ export function OrderOptimizer() {
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Optimizing...
+              Mengoptimalkan...
             </>
           ) : (
             <>
               <Sparkles className="mr-2 h-4 w-4" />
-              Generate Suggestions
+              Hasilkan Saran
             </>
           )}
         </Button>

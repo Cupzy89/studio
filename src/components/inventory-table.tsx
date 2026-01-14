@@ -23,16 +23,16 @@ export function InventoryTable() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Inventory Status</CardTitle>
-        <CardDescription>Real-time overview of all paper rolls.</CardDescription>
+        <CardTitle>Status Inventaris</CardTitle>
+        <CardDescription>Gambaran real-time dari semua gulungan kertas.</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Roll Type</TableHead>
+              <TableHead>Tipe Gulungan</TableHead>
               <TableHead className="text-center">Status</TableHead>
-              <TableHead className="text-right">Quantity</TableHead>
+              <TableHead className="text-right">Kuantitas</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -57,10 +57,10 @@ export function InventoryTable() {
                       variant="destructive"
                       className="flex items-center justify-center gap-1"
                     >
-                      <AlertTriangle className="h-3 w-3" /> Low Stock
+                      <AlertTriangle className="h-3 w-3" /> Stok Menipis
                     </Badge>
                   ) : (
-                    <Badge variant="secondary">In Stock</Badge>
+                    <Badge variant="secondary">Tersedia</Badge>
                   )}
                 </TableCell>
                 <TableCell className="text-right font-mono text-lg">

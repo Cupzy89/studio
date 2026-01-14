@@ -21,7 +21,7 @@ export function DashboardNav() {
     <SidebarMenu>
       <SidebarMenuItem>
         <SidebarMenuButton href="/" isActive={pathname === '/'}>
-          <LayoutDashboard /> Dashboard
+          <LayoutDashboard /> Dasbor
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
@@ -29,17 +29,17 @@ export function DashboardNav() {
           href="/inventory"
           isActive={pathname === '/inventory'}
         >
-          <Warehouse /> Inventory
+          <Warehouse /> Inventaris
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton>
-          <Truck /> Suppliers
+          <Truck /> Pemasok
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton>
-          <LineChart /> Analysis
+          <LineChart /> Analisis
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
