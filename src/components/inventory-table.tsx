@@ -1,4 +1,6 @@
+
 'use client';
+import { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
@@ -22,6 +24,8 @@ import { ScrollText, AlertTriangle } from 'lucide-react';
 export function InventoryTable() {
   const { paperRolls } = useInventory();
 
+  const memoizedPaperRolls = useMemo(() => paperRolls, [paperRolls]);
+
   return (
     <Card>
       <CardHeader>
@@ -38,7 +42,7 @@ export function InventoryTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paperRolls.map((roll: PaperRoll) => (
+            {memoizedPaperRolls.map((roll: PaperRoll) => (
               <TableRow key={roll.id}>
                 <TableCell>
                   <div className="flex items-center gap-3">
