@@ -99,12 +99,14 @@ export function UploadDialog() {
           const name = row['Part No'] || `Gulungan Tanpa Nama ${index + 1}`;
           const type = row['Kind'] || 'Uncoated';
           const quantity = Number(row['Qty']) || 0;
+          const rollCount = Number(row['Roll-Cnt']) || 0;
           
           return {
             id: row['SU No'] || `R${String(index + 1).padStart(3, '0')}`,
             name,
             type,
             quantity,
+            rollCount,
             reorderLevel: 50, // Default value
             lastUpdated: new Date().toISOString(),
           };
@@ -175,9 +177,7 @@ export function UploadDialog() {
             </div>
             <div>
               <p className="text-xs font-medium text-foreground">
-                Buatkan template excel, didalamnya terdapat kolom, GR date, Part
-                No, Kind, Gsm, Width, SU No, Qty, Roll-Cnt, storage Bin, Aging,
-                Batch, Diameter (Cm), Length, Vendor Name
+                Buatkan template excel, didalmnya terdapat kolom, GR date,Part No, Kind,Gsm,Width,SU No,Qty,Roll-Cnt ,storage Bin,Aging,Batch,Diameter (Cm),Lenght,Vendor Name
               </p>
             </div>
           </div>

@@ -2,7 +2,8 @@ export interface PaperRoll {
   id: string;
   name: string;
   type: 'Coated' | 'Uncoated' | 'Specialty';
-  quantity: number;
+  quantity: number; // Represents Weight (Qty from Excel)
+  rollCount: number; // Represents Roll Count (Roll-Cnt from Excel)
   reorderLevel: number;
   lastUpdated: string;
 }

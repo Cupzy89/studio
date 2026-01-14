@@ -38,7 +38,8 @@ export function InventoryTable() {
             <TableRow>
               <TableHead>Tipe Gulungan</TableHead>
               <TableHead className="text-center">Status</TableHead>
-              <TableHead className="text-right">Kuantitas</TableHead>
+              <TableHead className="text-center">Jumlah Gulungan</TableHead>
+              <TableHead className="text-right">Berat (kg)</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -69,8 +70,11 @@ export function InventoryTable() {
                     <Badge variant="secondary">Tersedia</Badge>
                   )}
                 </TableCell>
+                <TableCell className="text-center font-mono">
+                  {roll.rollCount}
+                </TableCell>
                 <TableCell className="text-right font-mono text-lg">
-                  {roll.quantity}
+                  {roll.quantity.toLocaleString()}
                 </TableCell>
               </TableRow>
             ))}

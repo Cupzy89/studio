@@ -15,10 +15,11 @@ export default function DashboardPage() {
   const { paperRolls } = useInventory();
   
   // Logic for "Total Roll" - sum of all quantities
-  const totalRoll = paperRolls.reduce((sum, roll) => sum + roll.quantity, 0);
+  const totalWeight = paperRolls.reduce((sum, roll) => sum + roll.quantity, 0);
+  const totalRolls = paperRolls.reduce((sum, roll) => sum + roll.rollCount, 0);
   
   // Logic for "Stock Local" - same as total quantity
-  const stockLocal = totalRoll;
+  const stockLocal = totalWeight;
 
   // Logic for "Stock Old" - count of items below reorder level
   const stockOld = paperRolls.filter(
@@ -36,9 +37,9 @@ export default function DashboardPage() {
             <ScrollText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalRoll}</div>
+            <div className="text-2xl font-bold">{totalRolls}</div>
             <p className="text-xs text-muted-foreground">
-              total qty di semua jenis
+              {totalWeight.toLocaleString()} kg total berat
             </p>
           </CardContent>
         </Card>
