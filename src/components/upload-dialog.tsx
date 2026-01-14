@@ -16,6 +16,33 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 
 export function UploadDialog() {
+  const handleDownloadTemplate = () => {
+    const headers = [
+      'GR date',
+      'Part No',
+      'Kind',
+      'Gsm',
+      'Width',
+      'SU No',
+      'Qty',
+      'Roll-Cnt',
+      'storage Bin',
+      'Aging',
+      'Batch',
+      'Diameter (Cm)',
+      'Length', // Corrected from 'Lenght'
+      'Vendor Name',
+    ];
+    const csvContent = 'data:text/csv;charset=utf-8,' + headers.join(',') + '\n';
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'inventory_template.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -32,24 +59,27 @@ export function UploadDialog() {
         </DialogHeader>
         <div className="grid gap-6 py-4">
           <div className="flex flex-col gap-4 rounded-lg border p-4">
-            <div className='flex items-start justify-between'>
-                <div>
-                    <h3 className="font-semibold">Unduh Template</h3>
-                    <p className="text-sm text-muted-foreground">
-                        Dapatkan template Excel untuk data Anda.
-                    </p>
-                </div>
-                <Button variant="outline" size="icon" className='shrink-0'>
-                    <Download className="h-4 w-4" />
-                </Button>
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="font-semibold">Unduh Template</h3>
+                <p className="text-sm text-muted-foreground">
+                  Dapatkan template CSV untuk data Anda.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                className="shrink-0"
+                onClick={handleDownloadTemplate}
+              >
+                <Download className="h-4 w-4" />
+              </Button>
             </div>
             <div>
               <p className="text-sm font-medium text-foreground">
-                Template Excel akan mencakup kolom-kolom berikut:
-              </p>
-              <p className="text-sm text-muted-foreground">
-                GR date, Part No, Kind, Gsm, Width, SU No, Qty, Roll-Cnt,
-                storage Bin, Aging, Batch, Diameter (Cm), Length, Vendor Name
+                Buatkan template excel, didalamnya terdapat kolom, GR date,Part
+                No, Kind,Gsm,Width,SU No,Qty,Roll-Cnt ,storage Bin,Aging,Batch,Diameter
+                (Cm),Length,Vendor Name
               </p>
             </div>
           </div>
