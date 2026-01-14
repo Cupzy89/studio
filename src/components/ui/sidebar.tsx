@@ -536,28 +536,26 @@ const sidebarMenuButtonVariants = cva(
 
 const SidebarMenuButton = React.forwardRef<
   HTMLButtonElement,
-  Omit<React.ComponentProps<typeof Link>, "href"> &
-    React.ComponentProps<"button"> & {
-      href?: string
-      isActive?: boolean
-      tooltip?: string | React.ComponentProps<typeof TooltipContent>
-    } & VariantProps<typeof sidebarMenuButtonVariants>
+  React.ComponentProps<"button"> & {
+    isActive?: boolean;
+    tooltip?: string | React.ComponentProps<typeof TooltipContent>;
+    asChild?: boolean;
+  } & VariantProps<typeof sidebarMenuButtonVariants>
 >(
   (
     {
-      href,
       isActive = false,
       variant = "default",
       size = "default",
       tooltip,
       className,
-      children,
+      asChild,
       ...props
     },
     ref
   ) => {
-    const { isMobile, state } = useSidebar()
-    const Comp = href ? Link : "button"
+    const { isMobile, state } = useSidebar();
+    const Comp = asChild ? Slot : "button";
 
     const button = (
       <Comp
@@ -566,21 +564,18 @@ const SidebarMenuButton = React.forwardRef<
         data-size={size}
         data-active={isActive}
         className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
-        {...(href ? { href } : {})}
         {...props}
-      >
-        {children}
-      </Comp>
-    )
+      />
+    );
 
     if (!tooltip) {
-      return button
+      return button;
     }
 
     if (typeof tooltip === "string") {
       tooltip = {
         children: tooltip,
-      }
+      };
     }
 
     return (
@@ -593,9 +588,9 @@ const SidebarMenuButton = React.forwardRef<
           {...tooltip}
         />
       </Tooltip>
-    )
+    );
   }
-)
+);
 SidebarMenuButton.displayName = "SidebarMenuButton"
 
 const SidebarMenuAction = React.forwardRef<

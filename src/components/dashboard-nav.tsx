@@ -14,23 +14,29 @@ import {
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { UploadDialog } from './upload-dialog';
+import Link from 'next/link';
 
 export function DashboardNav() {
   const pathname = usePathname();
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <SidebarMenuButton href="/" isActive={pathname === '/'}>
-          <LayoutDashboard /> Dasbor
-        </SidebarMenuButton>
+        <Link href="/">
+          <SidebarMenuButton isActive={pathname === '/'} asChild>
+            <span className="flex w-full items-center gap-2">
+              <LayoutDashboard /> Dasbor
+            </span>
+          </SidebarMenuButton>
+        </Link>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <SidebarMenuButton
-          href="/inventory"
-          isActive={pathname === '/inventory'}
-        >
-          <Warehouse /> Inventaris
-        </SidebarMenuButton>
+        <Link href="/inventory">
+          <SidebarMenuButton isActive={pathname === '/inventory'} asChild>
+            <span className="flex w-full items-center gap-2">
+              <Warehouse /> Inventaris
+            </span>
+          </SidebarMenuButton>
+        </Link>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton>
