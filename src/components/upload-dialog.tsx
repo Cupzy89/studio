@@ -30,7 +30,7 @@ export function UploadDialog() {
       'Aging',
       'Batch',
       'Diameter (Cm)',
-      'Length', // Corrected from 'Lenght'
+      'Length',
       'Vendor Name',
     ];
     const csvContent = 'data:text/csv;charset=utf-8,' + headers.join(',') + '\n';
@@ -77,9 +77,7 @@ export function UploadDialog() {
             </div>
             <div>
               <p className="text-sm font-medium text-foreground">
-                Buatkan template excel, didalamnya terdapat kolom, GR date,Part
-                No, Kind,Gsm,Width,SU No,Qty,Roll-Cnt ,storage Bin,Aging,Batch,Diameter
-                (Cm),Length,Vendor Name
+                Buatkan template excel, didalamnya terdapat kolom, GR date, Part No, Kind, Gsm, Width, SU No, Qty, Roll-Cnt, storage Bin, Aging, Batch, Diameter (Cm), Length, Vendor Name
               </p>
             </div>
           </div>
