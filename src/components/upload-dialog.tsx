@@ -77,8 +77,22 @@ export function UploadDialog() {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
+        if (!sheetName) {
+            throw new Error("Tidak ada sheet yang ditemukan di dalam file.");
+        }
         const worksheet = workbook.Sheets[sheetName];
         const json: any[] = XLSX.utils.sheet_to_json(worksheet);
+
+        if (json.length === 0) {
+            toast({
+                variant: 'destructive',
+                title: 'File Kosong',
+                description: 'File yang diunggah tidak berisi data.',
+            });
+            setIsUploading(false);
+            setFile(null);
+            return;
+        }
 
         const newPaperRolls: PaperRoll[] = json.map((row: any, index: number) => {
           // Basic validation and mapping
