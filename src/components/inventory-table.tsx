@@ -29,8 +29,10 @@ export function InventoryTable() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Status Inventaris</CardTitle>
-        <CardDescription>Gambaran real-time dari semua gulungan kertas.</CardDescription>
+        <CardTitle>Inventory Stock</CardTitle>
+        <CardDescription>
+          Stock paper roll
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
