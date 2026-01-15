@@ -175,7 +175,7 @@ export function UploadDialog() {
 
           let uniqueId = idValue;
           if (!uniqueId || String(uniqueId).trim() === '') {
-            uniqueId = `${nameValue || 'row'}-${batchValue || ''}-${index}`;
+            uniqueId = `${nameValue || 'part'}-${batchValue || 'batch'}-${index}`;
           }
 
           return {
