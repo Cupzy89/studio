@@ -1,6 +1,5 @@
 'use client';
 import { useMemo } from 'react';
-import { Badge } from '@/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -18,11 +17,11 @@ import {
 } from '@/components/ui/table';
 import { useInventory } from '@/context/inventory-context';
 import type { PaperRoll } from '@/lib/types';
-import { AlertTriangle } from 'lucide-react';
 
 export function InventoryTable() {
   const { paperRolls } = useInventory();
 
+  // useMemo will re-calculate only when paperRolls changes.
   const memoizedPaperRolls = useMemo(() => paperRolls, [paperRolls]);
 
   return (

@@ -115,11 +115,17 @@ export function UploadDialog() {
             }
             else if (typeof row['GR date'] === 'string') {
               try {
+                // Attempt to parse various common date formats
                 const parsedDate = parse(row['GR date'], 'MM/dd/yy', new Date());
                 if(!isNaN(parsedDate.getTime())) {
                   grDateStr = format(parsedDate, 'yyyy-MM-dd');
                 } else {
-                   grDateStr = row['GR date']; 
+                   const parsedDate2 = parse(row['GR date'], 'dd-MM-yyyy', new Date());
+                   if (!isNaN(parsedDate2.getTime())) {
+                     grDateStr = format(parsedDate2, 'yyyy-MM-dd');
+                   } else {
+                     grDateStr = row['GR date'];
+                   }
                 }
               } catch (dateError) {
                 console.warn(`Could not parse date for row ${index + 2}:`, row['GR date']);
