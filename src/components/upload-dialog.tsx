@@ -30,6 +30,15 @@ const excelDateToJSDate = (serial: number) => {
   return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate());
 };
 
+const findColumn = (header: string[], possibleNames: string[]): string | undefined => {
+  for (const name of possibleNames) {
+    const found = header.find(h => h.toLowerCase().trim() === name.toLowerCase().trim());
+    if (found) return found;
+  }
+  return undefined;
+}
+
+
 export function UploadDialog() {
   const { toast } = useToast();
   const { setPaperRolls } = useInventory();
@@ -91,8 +100,8 @@ export function UploadDialog() {
             throw new Error("Tidak ada sheet yang ditemukan di dalam file.");
         }
         const worksheet = workbook.Sheets[sheetName];
-        const json: any[] = XLSX.utils.sheet_to_json(worksheet, { raw: false });
-
+        const json: any[] = XLSX.utils.sheet_to_json(worksheet, { raw: true, defval: null });
+        
         if (json.length === 0) {
             toast({
                 variant: 'destructive',
@@ -103,52 +112,71 @@ export function UploadDialog() {
             setFile(null);
             return;
         }
+
+        const header: string[] = XLSX.utils.sheet_to_json(worksheet, { header: 1 })[0] as string[];
         
+        const keyMap = {
+          id: findColumn(header, ['SU No', 'SU_No', 'SU-No', 'id']),
+          name: findColumn(header, ['Part No', 'Part_No', 'Part-No', 'name']),
+          type: findColumn(header, ['Kind', 'type']),
+          grDate: findColumn(header, ['GR date', 'GR_date', 'GR-date', 'grDate']),
+          gsm: findColumn(header, ['Gsm', 'gsm']),
+          width: findColumn(header, ['Width', 'width']),
+          quantity: findColumn(header, ['Qty', 'quantity']),
+          rollCount: findColumn(header, ['Roll-Cnt', 'Roll Cnt', 'Roll_Cnt', 'rollCount']),
+          storageBin: findColumn(header, ['storage Bin', 'Storage Bin', 'storage_bin', 'storageBin']),
+          aging: findColumn(header, ['Aging', 'aging']),
+          batch: findColumn(header, ['Batch', 'batch']),
+          diameter: findColumn(header, ['Diameter (Cm)', 'Diameter', 'diameter']),
+          length: findColumn(header, ['Length', 'length']),
+          vendorName: findColumn(header, ['Vendor Name', 'Vendor_Name', 'vendorName']),
+        };
+
         const newPaperRolls: PaperRoll[] = json.map((row: any, index: number) => {
           let grDateStr = 'N/A';
-          if (row['GR date']) {
-            if (row['GR date'] instanceof Date) {
-              grDateStr = format(row['GR date'], 'yyyy-MM-dd');
+          const grDateValue = keyMap.grDate ? row[keyMap.grDate] : null;
+          if (grDateValue) {
+            if (grDateValue instanceof Date) {
+              grDateStr = format(grDateValue, 'yyyy-MM-dd');
             } 
-            else if (typeof row['GR date'] === 'number') {
-              grDateStr = format(excelDateToJSDate(row['GR date']), 'yyyy-MM-dd');
+            else if (typeof grDateValue === 'number') {
+              grDateStr = format(excelDateToJSDate(grDateValue), 'yyyy-MM-dd');
             }
-            else if (typeof row['GR date'] === 'string') {
+            else if (typeof grDateValue === 'string') {
               try {
-                // Attempt to parse various common date formats
-                const parsedDate = parse(row['GR date'], 'MM/dd/yy', new Date());
-                if(!isNaN(parsedDate.getTime())) {
-                  grDateStr = format(parsedDate, 'yyyy-MM-dd');
-                } else {
-                   const parsedDate2 = parse(row['GR date'], 'dd-MM-yyyy', new Date());
-                   if (!isNaN(parsedDate2.getTime())) {
-                     grDateStr = format(parsedDate2, 'yyyy-MM-dd');
-                   } else {
-                     grDateStr = row['GR date'];
-                   }
-                }
+                 const parsedDate = parse(grDateValue, 'MM/dd/yy', new Date());
+                 if(!isNaN(parsedDate.getTime())) {
+                   grDateStr = format(parsedDate, 'yyyy-MM-dd');
+                 } else {
+                    const parsedDate2 = parse(grDateValue, 'dd-MM-yyyy', new Date());
+                    if (!isNaN(parsedDate2.getTime())) {
+                      grDateStr = format(parsedDate2, 'yyyy-MM-dd');
+                    } else {
+                      grDateStr = grDateValue;
+                    }
+                 }
               } catch (dateError) {
-                console.warn(`Could not parse date for row ${index + 2}:`, row['GR date']);
-                grDateStr = row['GR date'];
+                console.warn(`Could not parse date for row ${index + 2}:`, grDateValue);
+                grDateStr = String(grDateValue);
               }
             }
           }
           
           return {
-            id: row['SU No'] || `R${String(index + 1).padStart(3, '0')}`,
-            name: row['Part No'] || `Part ${index + 1}`,
-            type: row['Kind'] || 'N/A',
+            id: String(keyMap.id ? row[keyMap.id] : `R${String(index + 1).padStart(3, '0')}`),
+            name: String(keyMap.name ? row[keyMap.name] : `Part ${index + 1}`),
+            type: String(keyMap.type ? row[keyMap.type] : 'N/A'),
             grDate: grDateStr,
-            gsm: Number(row['Gsm']) || 0,
-            width: Number(row['Width']) || 0,
-            quantity: Number(row['Qty']) || 0,
-            rollCount: Number(row['Roll-Cnt']) || 0,
-            storageBin: row['storage Bin'] || 'N/A',
-            aging: Number(row['Aging']) || 0,
-            batch: row['Batch'] || 'N/A',
-            diameter: Number(row['Diameter (Cm)']) || 0,
-            length: Number(row['Length']) || 0,
-            vendorName: row['Vendor Name'] || 'N/A',
+            gsm: Number(keyMap.gsm ? row[keyMap.gsm] : 0) || 0,
+            width: Number(keyMap.width ? row[keyMap.width] : 0) || 0,
+            quantity: Number(keyMap.quantity ? row[keyMap.quantity] : 0) || 0,
+            rollCount: Number(keyMap.rollCount ? row[keyMap.rollCount] : 0) || 0,
+            storageBin: String(keyMap.storageBin ? row[keyMap.storageBin] : 'N/A'),
+            aging: Number(keyMap.aging ? row[keyMap.aging] : 0) || 0,
+            batch: String(keyMap.batch ? row[keyMap.batch] : 'N/A'),
+            diameter: Number(keyMap.diameter ? row[keyMap.diameter] : 0) || 0,
+            length: Number(keyMap.length ? row[keyMap.length] : 0) || 0,
+            vendorName: String(keyMap.vendorName ? row[keyMap.vendorName] : 'N/A'),
             reorderLevel: 50, 
             lastUpdated: new Date().toISOString(),
           };
@@ -159,13 +187,13 @@ export function UploadDialog() {
           title: 'Unggah Berhasil',
           description: `${newPaperRolls.length} item inventaris telah berhasil dimuat.`,
         });
-        setIsOpen(false); // Close dialog on successful upload
+        setIsOpen(false);
       } catch (error) {
         console.error("Gagal mem-parsing file:", error);
         toast({
           variant: 'destructive',
           title: 'Unggah Gagal',
-          description: 'Gagal mem-parsing file. Pastikan formatnya benar.',
+          description: `Gagal mem-parsing file. Pastikan formatnya benar. Error: ${error instanceof Error ? error.message : String(error)}`,
         });
       } finally {
         setIsUploading(false);
