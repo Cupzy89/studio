@@ -169,18 +169,21 @@ export function UploadDialog() {
             }
           }
           
-          const idValue = keyMap.id ? row[keyMap.id] : null;
-          const nameValue = keyMap.name ? row[keyMap.name] : '';
-          const batchValue = keyMap.batch ? row[keyMap.batch] : '';
+          let idValue = keyMap.id ? row[keyMap.id] : null;
 
-          let uniqueId = idValue;
-          if (uniqueId === null || String(uniqueId).trim() === '') {
-            uniqueId = `${nameValue || 'part'}-${batchValue || 'batch'}-${index}`;
+          // Robust ID generation
+          if (idValue === null || String(idValue).trim() === '') {
+             // Create a composite key if the primary ID is missing
+             const compositeKey = Object.values(keyMap)
+                .map(key => key ? row[key] : '')
+                .join('-') + `-${index}`;
+              idValue = compositeKey;
           }
 
+
           return {
-            id: String(uniqueId),
-            name: String(nameValue || `Part ${index + 1}`),
+            id: String(idValue),
+            name: String((keyMap.name ? row[keyMap.name] : '') || `Part ${index + 1}`),
             type: String((keyMap.type ? row[keyMap.type] : '') || 'N/A'),
             grDate: grDateStr,
             gsm: Number(keyMap.gsm ? row[keyMap.gsm] : 0) || 0,
@@ -189,7 +192,7 @@ export function UploadDialog() {
             rollCount: Number(keyMap.rollCount ? row[keyMap.rollCount] : 0) || 0,
             storageBin: String(keyMap.storageBin ? row[keyMap.storageBin] : 'N/A'),
             aging: Number(keyMap.aging ? row[keyMap.aging] : 0) || 0,
-            batch: String(batchValue || 'N/A'),
+            batch: String((keyMap.batch ? row[keyMap.batch] : '') || 'N/A'),
             diameter: Number(keyMap.diameter ? row[keyMap.diameter] : 0) || 0,
             length: Number(keyMap.length ? row[keyMap.length] : 0) || 0,
             vendorName: String(keyMap.vendorName ? row[keyMap.vendorName] : 'N/A'),
