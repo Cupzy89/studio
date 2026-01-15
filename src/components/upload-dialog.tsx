@@ -35,6 +35,7 @@ export function UploadDialog() {
   const { setPaperRolls } = useInventory();
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleDownloadTemplate = () => {
     const headers = [
@@ -106,23 +107,23 @@ export function UploadDialog() {
         const newPaperRolls: PaperRoll[] = json.map((row: any, index: number) => {
           let grDateStr = 'N/A';
           if (row['GR date']) {
-            // Check if it's already a Date object (from cellDates:true)
             if (row['GR date'] instanceof Date) {
               grDateStr = format(row['GR date'], 'yyyy-MM-dd');
             } 
-            // Check for Excel serial number (if raw numbers are encountered)
             else if (typeof row['GR date'] === 'number') {
               grDateStr = format(excelDateToJSDate(row['GR date']), 'yyyy-MM-dd');
             }
-            // Check for string date formats
             else if (typeof row['GR date'] === 'string') {
               try {
-                // Attempt to parse common formats
                 const parsedDate = parse(row['GR date'], 'MM/dd/yy', new Date());
-                grDateStr = format(parsedDate, 'yyyy-MM-dd');
+                if(!isNaN(parsedDate.getTime())) {
+                  grDateStr = format(parsedDate, 'yyyy-MM-dd');
+                } else {
+                   grDateStr = row['GR date']; 
+                }
               } catch (dateError) {
                 console.warn(`Could not parse date for row ${index + 2}:`, row['GR date']);
-                grDateStr = row['GR date']; // Keep original string if parsing fails
+                grDateStr = row['GR date'];
               }
             }
           }
@@ -142,7 +143,7 @@ export function UploadDialog() {
             diameter: Number(row['Diameter (Cm)']) || 0,
             length: Number(row['Length']) || 0,
             vendorName: row['Vendor Name'] || 'N/A',
-            reorderLevel: 50, // Default value
+            reorderLevel: 50, 
             lastUpdated: new Date().toISOString(),
           };
         });
@@ -152,6 +153,7 @@ export function UploadDialog() {
           title: 'Unggah Berhasil',
           description: `${newPaperRolls.length} item inventaris telah berhasil dimuat.`,
         });
+        setIsOpen(false); // Close dialog on successful upload
       } catch (error) {
         console.error("Gagal mem-parsing file:", error);
         toast({
@@ -179,7 +181,7 @@ export function UploadDialog() {
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <SidebarMenuButton>
           <FileUp /> Unggah File
@@ -209,11 +211,6 @@ export function UploadDialog() {
               >
                 <Download className="h-4 w-4" />
               </Button>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-foreground">
-                Buatkan template excel, didalmnya terdapat kolom, GR date,Part No, Kind,Gsm,Width,SU No,Qty,Roll-Cnt ,storage Bin,Aging,Batch,Diameter (Cm),Length,Vendor Name
-              </p>
             </div>
           </div>
 
