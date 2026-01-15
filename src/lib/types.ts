@@ -1,9 +1,18 @@
 export interface PaperRoll {
-  id: string;
-  name: string;
-  type: 'Coated' | 'Uncoated' | 'Specialty';
-  quantity: number; // Represents Weight (Qty from Excel)
-  rollCount: number; // Represents Roll Count (Roll-Cnt from Excel)
+  id: string; // SU No
+  name: string; // Part No
+  type: string; // Kind
+  grDate: string; // GR date
+  gsm: number; // Gsm
+  width: number; // Width
+  quantity: number; // Qty (Weight)
+  rollCount: number; // Roll-Cnt
+  storageBin: string; // storage Bin
+  aging: number; // Aging
+  batch: string; // Batch
+  diameter: number; // Diameter (Cm)
+  length: number; // Length
+  vendorName: string; // Vendor Name
   reorderLevel: number;
   lastUpdated: string;
 }

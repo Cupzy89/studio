@@ -20,6 +20,15 @@ import { useToast } from '@/hooks/use-toast';
 import { useInventory } from '@/context/inventory-context';
 import * as XLSX from 'xlsx';
 import type { PaperRoll } from '@/lib/types';
+import { format, parse } from 'date-fns';
+
+// Function to convert Excel serial date to JS Date
+const excelDateToJSDate = (serial: number) => {
+  const utc_days = Math.floor(serial - 25569);
+  const utc_value = utc_days * 86400;
+  const date_info = new Date(utc_value * 1000);
+  return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate());
+};
 
 export function UploadDialog() {
   const { toast } = useToast();
@@ -75,13 +84,13 @@ export function UploadDialog() {
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
+        const workbook = XLSX.read(data, { type: 'array', cellDates: true });
         const sheetName = workbook.SheetNames[0];
         if (!sheetName) {
             throw new Error("Tidak ada sheet yang ditemukan di dalam file.");
         }
         const worksheet = workbook.Sheets[sheetName];
-        const json: any[] = XLSX.utils.sheet_to_json(worksheet);
+        const json: any[] = XLSX.utils.sheet_to_json(worksheet, { raw: false });
 
         if (json.length === 0) {
             toast({
@@ -93,20 +102,46 @@ export function UploadDialog() {
             setFile(null);
             return;
         }
-
+        
         const newPaperRolls: PaperRoll[] = json.map((row: any, index: number) => {
-          // Basic validation and mapping
-          const name = row['Part No'] || `Gulungan Tanpa Nama ${index + 1}`;
-          const type = row['Kind'] || 'Uncoated';
-          const quantity = Number(row['Qty']) || 0;
-          const rollCount = Number(row['Roll-Cnt']) || 0;
+          let grDateStr = 'N/A';
+          if (row['GR date']) {
+            // Check if it's already a Date object (from cellDates:true)
+            if (row['GR date'] instanceof Date) {
+              grDateStr = format(row['GR date'], 'yyyy-MM-dd');
+            } 
+            // Check for Excel serial number (if raw numbers are encountered)
+            else if (typeof row['GR date'] === 'number') {
+              grDateStr = format(excelDateToJSDate(row['GR date']), 'yyyy-MM-dd');
+            }
+            // Check for string date formats
+            else if (typeof row['GR date'] === 'string') {
+              try {
+                // Attempt to parse common formats
+                const parsedDate = parse(row['GR date'], 'MM/dd/yy', new Date());
+                grDateStr = format(parsedDate, 'yyyy-MM-dd');
+              } catch (dateError) {
+                console.warn(`Could not parse date for row ${index + 2}:`, row['GR date']);
+                grDateStr = row['GR date']; // Keep original string if parsing fails
+              }
+            }
+          }
           
           return {
             id: row['SU No'] || `R${String(index + 1).padStart(3, '0')}`,
-            name,
-            type,
-            quantity,
-            rollCount,
+            name: row['Part No'] || `Part ${index + 1}`,
+            type: row['Kind'] || 'N/A',
+            grDate: grDateStr,
+            gsm: Number(row['Gsm']) || 0,
+            width: Number(row['Width']) || 0,
+            quantity: Number(row['Qty']) || 0,
+            rollCount: Number(row['Roll-Cnt']) || 0,
+            storageBin: row['storage Bin'] || 'N/A',
+            aging: Number(row['Aging']) || 0,
+            batch: row['Batch'] || 'N/A',
+            diameter: Number(row['Diameter (Cm)']) || 0,
+            length: Number(row['Length']) || 0,
+            vendorName: row['Vendor Name'] || 'N/A',
             reorderLevel: 50, // Default value
             lastUpdated: new Date().toISOString(),
           };
@@ -177,7 +212,7 @@ export function UploadDialog() {
             </div>
             <div>
               <p className="text-xs font-medium text-foreground">
-                Buatkan template excel, didalmnya terdapat kolom, GR date,Part No, Kind,Gsm,Width,SU No,Qty,Roll-Cnt ,storage Bin,Aging,Batch,Diameter (Cm),Lenght,Vendor Name
+                Buatkan template excel, didalmnya terdapat kolom, GR date,Part No, Kind,Gsm,Width,SU No,Qty,Roll-Cnt ,storage Bin,Aging,Batch,Diameter (Cm),Length,Vendor Name
               </p>
             </div>
           </div>
