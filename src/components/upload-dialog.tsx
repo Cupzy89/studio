@@ -173,8 +173,13 @@ export function UploadDialog() {
           const nameValue = keyMap.name ? row[keyMap.name] : '';
           const batchValue = keyMap.batch ? row[keyMap.batch] : '';
 
+          let uniqueId = idValue;
+          if (!uniqueId || String(uniqueId).trim() === '') {
+            uniqueId = `${nameValue || 'row'}-${batchValue || ''}-${index}`;
+          }
+
           return {
-            id: String(idValue || `${nameValue}-${batchValue}-${index}`),
+            id: String(uniqueId),
             name: String(nameValue || `Part ${index + 1}`),
             type: String(keyMap.type ? row[keyMap.type] : 'N/A'),
             grDate: grDateStr,
