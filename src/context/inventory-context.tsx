@@ -28,13 +28,16 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
 
   // Load initial data from localStorage on client-side
   useEffect(() => {
+    setIsLoading(true);
     try {
       const storedData = localStorage.getItem(INVENTORY_STORAGE_KEY);
       if (storedData) {
-        setPaperRollsState(JSON.parse(storedData));
+        const parsedData = JSON.parse(storedData);
+        setPaperRollsState(parsedData);
       } else {
         // If no data in storage, use initial data
         setPaperRollsState(initialPaperRolls);
+        localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(initialPaperRolls));
       }
     } catch (error) {
       console.error('Failed to load inventory from localStorage', error);

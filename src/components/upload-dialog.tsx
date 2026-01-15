@@ -174,14 +174,14 @@ export function UploadDialog() {
           const batchValue = keyMap.batch ? row[keyMap.batch] : '';
 
           let uniqueId = idValue;
-          if (!uniqueId || String(uniqueId).trim() === '') {
+          if (uniqueId === null || String(uniqueId).trim() === '') {
             uniqueId = `${nameValue || 'part'}-${batchValue || 'batch'}-${index}`;
           }
 
           return {
             id: String(uniqueId),
             name: String(nameValue || `Part ${index + 1}`),
-            type: String(keyMap.type ? row[keyMap.type] : 'N/A'),
+            type: String((keyMap.type ? row[keyMap.type] : '') || 'N/A'),
             grDate: grDateStr,
             gsm: Number(keyMap.gsm ? row[keyMap.gsm] : 0) || 0,
             width: Number(keyMap.width ? row[keyMap.width] : 0) || 0,
