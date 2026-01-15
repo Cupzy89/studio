@@ -23,6 +23,7 @@ export function InventoryTable() {
 
   // useMemo will re-calculate only when paperRolls changes.
   const memoizedPaperRolls = useMemo(() => paperRolls, [paperRolls]);
+  const tableKey = useMemo(() => Date.now(), [paperRolls]);
 
   return (
     <Card>
@@ -33,7 +34,7 @@ export function InventoryTable() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Table>
+        <Table key={tableKey}>
           <TableHeader>
             <TableRow>
               <TableHead>Kind</TableHead>
