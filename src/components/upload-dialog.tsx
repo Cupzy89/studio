@@ -100,6 +100,9 @@ export function UploadDialog() {
             throw new Error("Tidak ada sheet yang ditemukan di dalam file.");
         }
         const worksheet = workbook.Sheets[sheetName];
+        if (!worksheet) {
+          throw new Error('Sheet pertama tidak ditemukan atau kosong.');
+        }
         const json: any[] = XLSX.utils.sheet_to_json(worksheet, { raw: true, defval: null });
         
         if (json.length === 0) {
@@ -113,7 +116,11 @@ export function UploadDialog() {
             return;
         }
 
-        const header: string[] = XLSX.utils.sheet_to_json(worksheet, { header: 1 })[0] as string[];
+        const headerRow = XLSX.utils.sheet_to_json(worksheet, { header: 1 })[0];
+        if (!headerRow || !Array.isArray(headerRow)) {
+            throw new Error("Header kolom tidak ditemukan.");
+        }
+        const header: string[] = headerRow.map(h => String(h));
         
         const keyMap = {
           id: findColumn(header, ['SU No', 'SU_No', 'SU-No', 'id']),
@@ -162,9 +169,13 @@ export function UploadDialog() {
             }
           }
           
+          const idValue = keyMap.id ? row[keyMap.id] : null;
+          const nameValue = keyMap.name ? row[keyMap.name] : '';
+          const batchValue = keyMap.batch ? row[keyMap.batch] : '';
+
           return {
-            id: String(keyMap.id ? row[keyMap.id] : `R${String(index + 1).padStart(3, '0')}`),
-            name: String(keyMap.name ? row[keyMap.name] : `Part ${index + 1}`),
+            id: String(idValue || `${nameValue}-${batchValue}-${index}`),
+            name: String(nameValue || `Part ${index + 1}`),
             type: String(keyMap.type ? row[keyMap.type] : 'N/A'),
             grDate: grDateStr,
             gsm: Number(keyMap.gsm ? row[keyMap.gsm] : 0) || 0,
@@ -173,7 +184,7 @@ export function UploadDialog() {
             rollCount: Number(keyMap.rollCount ? row[keyMap.rollCount] : 0) || 0,
             storageBin: String(keyMap.storageBin ? row[keyMap.storageBin] : 'N/A'),
             aging: Number(keyMap.aging ? row[keyMap.aging] : 0) || 0,
-            batch: String(keyMap.batch ? row[keyMap.batch] : 'N/A'),
+            batch: String(batchValue || 'N/A'),
             diameter: Number(keyMap.diameter ? row[keyMap.diameter] : 0) || 0,
             length: Number(keyMap.length ? row[keyMap.length] : 0) || 0,
             vendorName: String(keyMap.vendorName ? row[keyMap.vendorName] : 'N/A'),
