@@ -169,14 +169,12 @@ export function UploadDialog() {
             }
           }
           
-          let idValue = keyMap.id ? row[keyMap.id] : null;
+          let idValue: string | number | null = keyMap.id ? row[keyMap.id] : null;
 
           // Robust ID generation
           if (idValue === null || String(idValue).trim() === '') {
              // Create a composite key if the primary ID is missing
-             const compositeKey = Object.values(keyMap)
-                .map(key => key ? row[key] : '')
-                .join('-') + `-${index}`;
+             const compositeKey = Object.values(row).join('-') + `-${index}`;
               idValue = compositeKey;
           }
 
