@@ -53,7 +53,7 @@ export function InventoryTable() {
               ))
             ) : memoizedPaperRolls.length > 0 ? (
               memoizedPaperRolls.map((roll: PaperRoll, index: number) => (
-                <TableRow key={roll.id || `roll-${index}`}>
+                <TableRow key={`${roll.id}-${index}`}>
                   <TableCell>{roll.type}</TableCell>
                   <TableCell className="text-right font-mono">{roll.rollCount}</TableCell>
                   <TableCell className="text-right font-mono">{roll.quantity.toLocaleString()}</TableCell>
