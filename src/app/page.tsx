@@ -10,18 +10,16 @@ import { InventoryTable } from '@/components/inventory-table';
 import { UsageChart } from '@/components/usage-chart';
 import { OrderOptimizer } from '@/components/order-optimizer';
 import { useInventory } from '@/context/inventory-context';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardPage() {
-  const { paperRolls } = useInventory();
+  const { paperRolls, isLoading } = useInventory();
   
-  // Logic for "Total Roll" - sum of all quantities
   const totalWeight = paperRolls.reduce((sum, roll) => sum + roll.quantity, 0);
   const totalRolls = paperRolls.reduce((sum, roll) => sum + roll.rollCount, 0);
   
-  // Logic for "Stock Local" - same as total quantity
   const stockLocal = totalWeight;
 
-  // Logic for "Stock Old" - count of items below reorder level
   const stockOld = paperRolls.filter(
     (roll) => roll.quantity < roll.reorderLevel
   ).length;
@@ -37,10 +35,16 @@ export default function DashboardPage() {
             <ScrollText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalRolls}</div>
-            <p className="text-xs text-muted-foreground">
-              {totalWeight.toLocaleString()} kg total berat
-            </p>
+            {isLoading ? (
+                <Skeleton className="h-10 w-3/4" />
+            ) : (
+                <>
+                    <div className="text-2xl font-bold">{totalRolls}</div>
+                    <p className="text-xs text-muted-foreground">
+                    {totalWeight.toLocaleString()} kg total berat
+                    </p>
+                </>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -51,10 +55,16 @@ export default function DashboardPage() {
             <Warehouse className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stockLocal}</div>
-            <p className="text-xs text-muted-foreground">
-              total qty dari stok lokal
-            </p>
+             {isLoading ? (
+                <Skeleton className="h-10 w-3/4" />
+            ) : (
+                <>
+                    <div className="text-2xl font-bold">{stockLocal.toLocaleString()}</div>
+                    <p className="text-xs text-muted-foreground">
+                    total qty dari stok lokal
+                    </p>
+                </>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -63,8 +73,14 @@ export default function DashboardPage() {
             <AlertTriangle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stockOld}</div>
-            <p className="text-xs text-muted-foreground">total dari stok lama</p>
+            {isLoading ? (
+                <Skeleton className="h-10 w-3/4" />
+            ) : (
+                <>
+                    <div className="text-2xl font-bold">{stockOld}</div>
+                    <p className="text-xs text-muted-foreground">total dari stok lama</p>
+                </>
+            )}
           </CardContent>
         </Card>
       </div>

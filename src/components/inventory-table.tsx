@@ -17,13 +17,13 @@ import {
 } from '@/components/ui/table';
 import { useInventory } from '@/context/inventory-context';
 import type { PaperRoll } from '@/lib/types';
+import { Skeleton } from './ui/skeleton';
 
 export function InventoryTable() {
-  const { paperRolls } = useInventory();
+  const { paperRolls, isLoading } = useInventory();
 
   // useMemo will re-calculate only when paperRolls changes.
   const memoizedPaperRolls = useMemo(() => paperRolls, [paperRolls]);
-  const tableKey = useMemo(() => Date.now(), [paperRolls]);
 
   return (
     <Card>
@@ -34,7 +34,7 @@ export function InventoryTable() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Table key={tableKey}>
+        <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Kind</TableHead>
@@ -43,13 +43,29 @@ export function InventoryTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {memoizedPaperRolls.map((roll: PaperRoll) => (
-              <TableRow key={roll.id}>
-                <TableCell>{roll.type}</TableCell>
-                <TableCell className="text-right font-mono">{roll.rollCount}</TableCell>
-                <TableCell className="text-right font-mono">{roll.quantity.toLocaleString()}</TableCell>
-              </TableRow>
-            ))}
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, index) => (
+                <TableRow key={index}>
+                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-12 float-right" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-20 float-right" /></TableCell>
+                </TableRow>
+              ))
+            ) : memoizedPaperRolls.length > 0 ? (
+              memoizedPaperRolls.map((roll: PaperRoll) => (
+                <TableRow key={roll.id}>
+                  <TableCell>{roll.type}</TableCell>
+                  <TableCell className="text-right font-mono">{roll.rollCount}</TableCell>
+                  <TableCell className="text-right font-mono">{roll.quantity.toLocaleString()}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+                <TableRow>
+                    <TableCell colSpan={3} className="text-center">
+                        Tidak ada data inventaris. Silakan unggah file.
+                    </TableCell>
+                </TableRow>
+            )}
           </TableBody>
         </Table>
       </CardContent>
