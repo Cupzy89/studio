@@ -1,14 +1,13 @@
 {
   "entities": {
     "User": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
       "description": "Represents a user account for the RollView application.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the user."
+          "description": "Unique identifier for the user, matches auth UID."
         },
         "username": {
           "type": "string",
@@ -25,59 +24,44 @@
           "format": "date-time"
         }
       },
-      "required": [
-        "id",
-        "username",
-        "email",
-        "registrationDate"
-      ]
+      "required": ["id", "username", "email", "registrationDate"]
+    },
+    "Roll": {
+      "title": "Roll",
+      "type": "object",
+      "description": "Represents a paper roll in the inventory.",
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "type": {"type": "string"},
+        "grDate": {"type": "string", "format": "date"},
+        "gsm": {"type": "number"},
+        "width": {"type": "number"},
+        "quantity": {"type": "number"},
+        "rollCount": {"type": "number"},
+        "storageBin": {"type": "string"},
+        "aging": {"type": "number"},
+        "batch": {"type": "string"},
+        "diameter": {"type": "number"},
+        "length": {"type": "number"},
+        "vendorName": {"type": "string"},
+        "reorderLevel": {"type": "number"},
+        "lastUpdated": {"type": "string", "format": "date-time"}
+      },
+      "required": ["id", "name", "type", "quantity", "rollCount"]
     }
   },
   "auth": {
-    "providers": [
-      "password",
-      "anonymous"
-    ]
+    "providers": ["password"]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores user profiles. Only the authenticated user can access their own profile via path-based ownership.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/rolls/{rollId}",
-        "definition": {
-          "entityName": "roll",
-          "schema": {
-            "$ref": "#/backend/entities/Roll"
-          },
-          "description": "Stores paper roll inventory for each user. Only the authenticated user can access rolls within their own userId path via path-based ownership.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "rollId",
-              "description": "The unique identifier of the paper roll."
-            }
-          ]
-        }
-      }
-    ],
-    "reasoning": "The Firestore structure is designed to support the RollView application's user authentication and inventory tracking features. It follows the principles of Authorization Independence by avoiding `get()` calls in security rules through path-based ownership. Structural Segregation is achieved by dedicating collections to specific entities with uniform access control needs.\n\nThe `/users/{userId}` collection stores user profiles, enabling path-based access control where each user can only access their profile. This ensures that user data is private and only accessible to the authenticated user.\n\nThe `/users/{userId}/rolls/{rollId}` collection stores the paper roll inventory for each user. This design allows each user to manage their own inventory. The path-based structure enables simple security rules where a user can only access rolls within their `userId` path. The `roll` documents could include fields for real-time inventory tracking, low stock alerts, and historical usage analysis, all under the user's control.\n\nQAPs are supported via structural segregation. Listing operations are secure because rules can ensure that users can only list rolls associated with their own `userId`."
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores user profiles. Only the authenticated user can access their own profile."
+    },
+    "/users/{userId}/rolls/{rollId}": {
+      "schema": { "$ref": "#/entities/Roll" },
+      "description": "Stores paper roll inventory for each user. Only the authenticated user can access rolls within their own userId path."
+    }
   }
 }

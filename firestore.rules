@@ -1,122 +1,50 @@
-/**
- * This ruleset enforces a strict user-ownership model for the RollView application.
- *
- * Core Philosophy:
- * The security model ensures that users have complete and exclusive control over their
- * own data. All user-specific information, including their profile and their 'rolls'
- * inventory, is stored within a document path that includes their unique user ID.
- * This path-based security is simple, highly performant, and secure.
- *
- * Data Structure:
- * All data is organized under the top-level `/users` collection. Each user is represented
- * by a document: `/users/{userId}`. All associated data for that user, such as their
- * paper roll inventory, is stored in a subcollection: `/users/{userId}/rolls/{rollId}`.
- *
- * Key Security Decisions:
- * - User Isolation: A user can only read or write data that exists under their own
- *   `/users/{userId}` path. They cannot access, or even know about, the data of
- *   other users.
- * - No User Listing: To protect user privacy and prevent data scraping, listing all
- *   documents in the top-level `/users` collection is explicitly forbidden.
- * - Ownership Integrity: When a user profile is created, the rules enforce that the
- *   'id' field within the document must match the user's authentication UID. This
- *   field is then made immutable to maintain relational integrity.
- *
- * Denormalization for Authorization:
- * This ruleset leverages a path-based security model, which is a form of structural
- * denormalization. By placing a user's data within a path containing their UID
- * (e.g., `/users/{userId}/...`), authorization checks become simple and fast, avoiding
- * the need for costly `get()` calls to other documents.
- *
- * Structural Segregation:
- * The data is structurally segregated by user. The `/users/{userId}` document holds
- * the user's profile, and the `/users/{userId}/rolls` subcollection holds their
- * inventory. This separation ensures that access controls applied to the user's profile
- * do not unintentionally leak to their inventory data and vice-versa.
- */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions for improved readability and reusability.
-    
-    /**
-     * Checks if the user is authenticated.
-     */
+    // Helper functions
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /**
-     * Validates if the requesting user's UID matches the document's owner ID from the path.
-     * This is the primary function for enforcing the user-ownership model.
-     * @param userId The user ID from the document path.
-     */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /**
-     * Verifies that the document being modified or deleted actually exists.
-     * Prevents writes to non-existent documents, which is a security best practice.
-     */
-    function isExistingDoc() {
-      return resource != null;
+    // --- Schema Validation Functions ---
+    function isValidUser(data) {
+      return data.id == request.auth.uid
+        && data.username is string && data.username.size() > 0
+        && data.email is string && data.email.matches('.+@.+\\..+')
+        && data.registrationDate is timestamp;
     }
     
-    /**
-     * Combines ownership and existence checks for secure updates and deletes.
-     * @param userId The user ID from the document path.
-     */
-    function isOwnerOfExistingDoc(userId) {
-      return isOwner(userId) && isExistingDoc();
+    function isImmutableUserFields(data) {
+        return data.id == resource.data.id
+            && data.email == resource.data.email
+            && data.registrationDate == resource.data.registrationDate;
     }
 
-    /**
-     * On create, validates that the user document's internal `id` field matches the
-     * user's auth UID and the document's ID in the path.
-     * @param userId The user ID from the document path.
-     */
-    function hasValidUserIdOnCreate(userId) {
-      return request.resource.data.id == userId;
+    function isValidRoll(data) {
+        return data.name is string
+            && data.type is string
+            && data.quantity is number
+            && data.rollCount is number;
     }
 
-    /**
-     * On update, ensures the `id` field within a user document cannot be changed.
-     * This enforces relational integrity and prevents ownership hijacking.
-     */
-    function isUserIdImmutableOnUpdate() {
-      return request.resource.data.id == resource.data.id;
-    }
-
-    /**
-     * @description Rules for a user's own profile document.
-     * @path /users/{userId}
-     * @allow (create) An authenticated user creating their own profile document.
-     * @deny (list) Any user attempting to list all user profiles in the system.
-     * @principle Restricts access to a user's own data tree and prevents user enumeration.
-     */
+    // --- Rules ---
     match /users/{userId} {
       allow get: if isOwner(userId);
-      allow list: if false;
-      allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
-      allow update: if isOwnerOfExistingDoc(userId) && isUserIdImmutableOnUpdate();
-      allow delete: if isOwnerOfExistingDoc(userId);
-    }
+      allow list: if false; // Deny listing all users for privacy
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isImmutableUserFields(request.resource.data);
+      allow delete: if isOwner(userId);
 
-    /**
-     * @description Rules for the paper roll inventory subcollection for a user.
-     * @path /users/{userId}/rolls/{rollId}
-     * @allow (create, list) The owner creating or listing their own paper rolls.
-     * @deny (get, update) Another authenticated user trying to access or modify a user's rolls.
-     * @principle Enforces inherited ownership from the parent document path.
-     */
-    match /users/{userId}/rolls/{rollId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId);
-      allow update: if isOwnerOfExistingDoc(userId);
-      allow delete: if isOwnerOfExistingDoc(userId);
+      match /rolls/{rollId} {
+        allow read, list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidRoll(request.resource.data);
+        allow update, delete: if isOwner(userId);
+      }
     }
   }
 }
