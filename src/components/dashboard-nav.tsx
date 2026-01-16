@@ -39,9 +39,13 @@ export function DashboardNav() {
         </Link>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <SidebarMenuButton>
-          <Truck /> Pemasok
-        </SidebarMenuButton>
+        <Link href="/suppliers">
+          <SidebarMenuButton isActive={pathname === '/suppliers'} asChild>
+            <span className="flex w-full items-center gap-2">
+              <Truck /> Pemasok
+            </span>
+          </SidebarMenuButton>
+        </Link>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton>
