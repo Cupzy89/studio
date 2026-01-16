@@ -18,7 +18,7 @@ export default function DashboardPage() {
   const totalWeight = paperRolls.reduce((sum, roll) => sum + roll.quantity, 0);
   const totalRolls = paperRolls.reduce((sum, roll) => sum + roll.rollCount, 0);
   
-  const stockLocal = totalWeight;
+  const stockLocal = totalRolls;
 
   const stockOld = paperRolls.filter(
     (roll) => roll.quantity < roll.reorderLevel
@@ -61,7 +61,7 @@ export default function DashboardPage() {
                 <>
                     <div className="text-2xl font-bold">{stockLocal.toLocaleString()}</div>
                     <p className="text-xs text-muted-foreground">
-                    total qty dari stok lokal
+                    total roll dari stok lokal
                     </p>
                 </>
             )}
