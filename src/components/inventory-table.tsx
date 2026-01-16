@@ -23,14 +23,14 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Filter, Search } from 'lucide-react';
+import { Filter, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Label } from './ui/label';
 
 const FilterPopover = ({ title, options, selected, onSelectionChange }: { title: string, options: string[], selected: string[], onSelectionChange: (newSelection: string[]) => void }) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-6 w-6 ml-2 data-[state=open]:bg-accent data-[state=open]:text-accent-foreground">
+        <Button variant="ghost" size="icon" className="h-6 w-6 ml-1 data-[state=open]:bg-accent data-[state=open]:text-accent-foreground">
           <Filter className="h-4 w-4" />
         </Button>
       </PopoverTrigger>
@@ -75,6 +75,7 @@ const FilterPopover = ({ title, options, selected, onSelectionChange }: { title:
 export function InventoryTable() {
   const { paperRolls, isLoading } = useInventory();
   const [partNoSearch, setPartNoSearch] = useState('');
+  const [sortConfig, setSortConfig] = useState<{ key: keyof PaperRoll; direction: 'asc' | 'desc' } | null>(null);
   const [columnFilters, setColumnFilters] = useState<{
     type: string[];
     vendorName: string[];
@@ -93,8 +94,16 @@ export function InventoryTable() {
     return { uniqueKinds: kinds, uniqueVendors: vendors, uniqueStorageBins: bins };
   }, [paperRolls, isLoading]);
 
-  const filteredRolls = useMemo(() => {
-    return paperRolls.filter((roll) => {
+  const requestSort = (key: keyof PaperRoll) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedAndFilteredRolls = useMemo(() => {
+    let filtered = paperRolls.filter((roll) => {
       const searchMatch = partNoSearch
         ? roll.name.toLowerCase().includes(partNoSearch.toLowerCase())
         : true;
@@ -113,11 +122,43 @@ export function InventoryTable() {
 
       return searchMatch && kindMatch && vendorMatch && storageBinMatch;
     });
-  }, [paperRolls, partNoSearch, columnFilters]);
+
+    if (sortConfig !== null) {
+      filtered.sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+        
+        if (aValue === null || aValue === undefined) return 1;
+        if (bValue === null || bValue === undefined) return -1;
+        
+        let compareResult = 0;
+
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+            compareResult = aValue - bValue;
+        } else {
+            compareResult = String(aValue).localeCompare(String(bValue));
+        }
+
+        return sortConfig.direction === 'asc' ? compareResult : -compareResult;
+      });
+    }
+
+    return filtered;
+  }, [paperRolls, partNoSearch, columnFilters, sortConfig]);
 
   const handleFilterChange = (column: 'type' | 'vendorName' | 'storageBin') => (selection: string[]) => {
     setColumnFilters(prev => ({ ...prev, [column]: selection }));
   }
+  
+  const getSortIcon = (columnKey: keyof PaperRoll) => {
+    if (!sortConfig || sortConfig.key !== columnKey) {
+      return <ArrowUpDown className="ml-2 h-4 w-4" />;
+    }
+    if (sortConfig.direction === 'asc') {
+      return <ArrowUp className="ml-2 h-4 w-4" />;
+    }
+    return <ArrowDown className="ml-2 h-4 w-4" />;
+  };
 
   return (
     <Card>
@@ -141,37 +182,71 @@ export function InventoryTable() {
           <Table>
             <TableHeader className="sticky top-0 bg-background z-10">
               <TableRow>
-                <TableHead>Part No</TableHead>
-                <TableHead>
-                    <div className="flex items-center">
-                        Kind
-                         <FilterPopover 
-                            title="Kind"
-                            options={uniqueKinds}
-                            selected={columnFilters.type}
-                            onSelectionChange={handleFilterChange('type')}
-                        />
-                    </div>
+                 <TableHead>
+                  <Button variant="ghost" onClick={() => requestSort('name')} className="px-1 py-1 h-auto -ml-2">
+                    Part No {getSortIcon('name')}
+                  </Button>
                 </TableHead>
-                <TableHead>GR Date</TableHead>
-                <TableHead>Gsm</TableHead>
-                <TableHead>Width</TableHead>
-                <TableHead className="text-right">Qty (Kg)</TableHead>
-                <TableHead className="text-right">Roll-Cnt</TableHead>
                 <TableHead>
-                    <div className="flex items-center">
-                        Storage Bin
-                         <FilterPopover 
-                            title="Storage Bin"
-                            options={uniqueStorageBins}
-                            selected={columnFilters.storageBin}
-                            onSelectionChange={handleFilterChange('storageBin')}
-                        />
+                    <div className="flex items-center -ml-2">
+                      <Button variant="ghost" onClick={() => requestSort('type')} className="px-1 py-1 h-auto">
+                        Kind {getSortIcon('type')}
+                      </Button>
+                      <FilterPopover 
+                        title="Kind"
+                        options={uniqueKinds}
+                        selected={columnFilters.type}
+                        onSelectionChange={handleFilterChange('type')}
+                      />
                     </div>
                 </TableHead>
                 <TableHead>
-                     <div className="flex items-center">
-                        Vendor
+                  <Button variant="ghost" onClick={() => requestSort('grDate')} className="px-1 py-1 h-auto -ml-2">
+                    GR Date {getSortIcon('grDate')}
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button variant="ghost" onClick={() => requestSort('gsm')} className="px-1 py-1 h-auto -ml-2">
+                    Gsm {getSortIcon('gsm')}
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button variant="ghost" onClick={() => requestSort('width')} className="px-1 py-1 h-auto -ml-2">
+                    Width {getSortIcon('width')}
+                  </Button>
+                </TableHead>
+                <TableHead className="text-right">
+                   <div className="flex items-center justify-end -mr-2">
+                      <Button variant="ghost" onClick={() => requestSort('quantity')} className="px-1 py-1 h-auto">
+                        Qty (Kg) {getSortIcon('quantity')}
+                      </Button>
+                   </div>
+                </TableHead>
+                <TableHead className="text-right">
+                   <div className="flex items-center justify-end -mr-2">
+                      <Button variant="ghost" onClick={() => requestSort('rollCount')} className="px-1 py-1 h-auto">
+                        Roll-Cnt {getSortIcon('rollCount')}
+                      </Button>
+                   </div>
+                </TableHead>
+                <TableHead>
+                    <div className="flex items-center -ml-2">
+                      <Button variant="ghost" onClick={() => requestSort('storageBin')} className="px-1 py-1 h-auto">
+                        Storage Bin {getSortIcon('storageBin')}
+                      </Button>
+                      <FilterPopover 
+                        title="Storage Bin"
+                        options={uniqueStorageBins}
+                        selected={columnFilters.storageBin}
+                        onSelectionChange={handleFilterChange('storageBin')}
+                      />
+                    </div>
+                </TableHead>
+                <TableHead>
+                     <div className="flex items-center -ml-2">
+                        <Button variant="ghost" onClick={() => requestSort('vendorName')} className="px-1 py-1 h-auto">
+                           Vendor {getSortIcon('vendorName')}
+                        </Button>
                         <FilterPopover 
                             title="Vendor"
                             options={uniqueVendors}
@@ -197,9 +272,9 @@ export function InventoryTable() {
                     <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                   </TableRow>
                 ))
-              ) : filteredRolls.length > 0 ? (
-                filteredRolls.map((roll: PaperRoll, index: number) => (
-                  <TableRow key={`${roll.id}-${index}`}>
+              ) : sortedAndFilteredRolls.length > 0 ? (
+                sortedAndFilteredRolls.map((roll: PaperRoll) => (
+                  <TableRow key={roll.id}>
                     <TableCell className="font-medium">{roll.name}</TableCell>
                     <TableCell>{roll.type}</TableCell>
                     <TableCell>{roll.grDate}</TableCell>
