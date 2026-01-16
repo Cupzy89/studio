@@ -2,20 +2,10 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarHeader,
-  SidebarContent,
-  SidebarInset,
-  SidebarTrigger,
-} from '@/components/ui/sidebar';
-import { Logo } from '@/components/logo';
-import { DashboardNav } from '@/components/dashboard-nav';
 import { ThemeProvider } from '@/components/theme-provider';
 import { InventoryProvider } from '@/context/inventory-context';
 import { FirebaseClientProvider } from '@/firebase';
-import { AuthMenu } from '@/components/auth-menu';
+import { MainLayout } from '@/components/main-layout';
 
 export const metadata: Metadata = {
   title: 'RollView',
@@ -50,32 +40,7 @@ export default function RootLayout({
         >
           <FirebaseClientProvider>
             <InventoryProvider>
-              <SidebarProvider>
-                <Sidebar>
-                  <SidebarHeader>
-                    <div className="flex items-center gap-2 p-2">
-                      <Logo />
-                      <h1 className="text-xl font-semibold text-primary">
-                        RollView
-                      </h1>
-                    </div>
-                  </SidebarHeader>
-                  <SidebarContent>
-                    <DashboardNav />
-                  </SidebarContent>
-                </Sidebar>
-
-                <SidebarInset>
-                  <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background px-4 sm:px-6">
-                    <SidebarTrigger />
-                    <div className="ml-auto flex items-center gap-4">
-                      <AuthMenu />
-                    </div>
-                  </header>
-
-                  <main className="flex-1 space-y-6 p-4 sm:p-6">{children}</main>
-                </SidebarInset>
-              </SidebarProvider>
+              <MainLayout>{children}</MainLayout>
             </InventoryProvider>
           </FirebaseClientProvider>
           <Toaster />
