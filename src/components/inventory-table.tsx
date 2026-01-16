@@ -273,8 +273,8 @@ export function InventoryTable() {
                   </TableRow>
                 ))
               ) : sortedAndFilteredRolls.length > 0 ? (
-                sortedAndFilteredRolls.map((roll: PaperRoll) => (
-                  <TableRow key={roll.id}>
+                sortedAndFilteredRolls.map((roll: PaperRoll, index: number) => (
+                  <TableRow key={roll.id ? `${roll.id}-${index}` : `inventory-item-${index}`}>
                     <TableCell className="font-medium">{roll.name}</TableCell>
                     <TableCell>{roll.type}</TableCell>
                     <TableCell>{roll.grDate}</TableCell>
