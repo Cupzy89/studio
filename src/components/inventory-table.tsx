@@ -16,14 +16,34 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useInventory } from '@/context/inventory-context';
-import type { PaperRoll } from '@/lib/types';
 import { Skeleton } from './ui/skeleton';
+
+interface AggregatedRoll {
+  type: string;
+  rollCount: number;
+  quantity: number;
+}
 
 export function InventoryTable() {
   const { paperRolls, isLoading } = useInventory();
 
-  // useMemo will re-calculate only when paperRolls changes.
-  const memoizedPaperRolls = useMemo(() => paperRolls, [paperRolls]);
+  const aggregatedData = useMemo(() => {
+    if (!paperRolls) {
+      return [];
+    }
+
+    const groupedData = paperRolls.reduce((acc, roll) => {
+      const kind = roll.type || 'N/A';
+      if (!acc[kind]) {
+        acc[kind] = { type: kind, rollCount: 0, quantity: 0 };
+      }
+      acc[kind].rollCount += Number(roll.rollCount) || 0;
+      acc[kind].quantity += Number(roll.quantity) || 0;
+      return acc;
+    }, {} as { [key: string]: AggregatedRoll });
+
+    return Object.values(groupedData).sort((a, b) => a.type.localeCompare(b.type));
+  }, [paperRolls]);
 
   return (
     <Card>
@@ -51,12 +71,12 @@ export function InventoryTable() {
                   <TableCell><Skeleton className="h-4 w-20 float-right" /></TableCell>
                 </TableRow>
               ))
-            ) : memoizedPaperRolls.length > 0 ? (
-              memoizedPaperRolls.map((roll: PaperRoll, index: number) => (
-                <TableRow key={`${roll.id}-${index}`}>
-                  <TableCell>{roll.type}</TableCell>
-                  <TableCell className="text-right font-mono">{roll.rollCount}</TableCell>
-                  <TableCell className="text-right font-mono">{roll.quantity.toLocaleString()}</TableCell>
+            ) : aggregatedData.length > 0 ? (
+              aggregatedData.map((group: AggregatedRoll) => (
+                <TableRow key={group.type}>
+                  <TableCell>{group.type}</TableCell>
+                  <TableCell className="text-right font-mono">{group.rollCount}</TableCell>
+                  <TableCell className="text-right font-mono">{group.quantity.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 })}</TableCell>
                 </TableRow>
               ))
             ) : (
