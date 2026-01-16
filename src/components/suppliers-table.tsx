@@ -20,8 +20,8 @@ import { useInventory } from '@/context/inventory-context';
 import { Skeleton } from './ui/skeleton';
 import { ScrollArea } from './ui/scroll-area';
 
-interface SupplierSummary {
-  vendorName: string;
+interface KindSummary {
+  kind: string;
   totalRolls: number;
   totalQuantity: number;
 }
@@ -29,7 +29,7 @@ interface SupplierSummary {
 export function SuppliersTable() {
   const { paperRolls, isLoading } = useInventory();
 
-  const supplierSummary: SupplierSummary[] = useMemo(() => {
+  const kindSummary: KindSummary[] = useMemo(() => {
     if (isLoading || !paperRolls) {
       return [];
     }
@@ -37,29 +37,29 @@ export function SuppliersTable() {
     const summary: Record<string, { totalRolls: number; totalQuantity: number }> = {};
 
     paperRolls.forEach(roll => {
-      const vendor = roll.vendorName || 'Tidak Diketahui';
-      if (!summary[vendor]) {
-        summary[vendor] = { totalRolls: 0, totalQuantity: 0 };
+      const kind = roll.type || 'Tidak Diketahui';
+      if (!summary[kind]) {
+        summary[kind] = { totalRolls: 0, totalQuantity: 0 };
       }
-      summary[vendor].totalRolls += roll.rollCount;
-      summary[vendor].totalQuantity += roll.quantity;
+      summary[kind].totalRolls += roll.rollCount;
+      summary[kind].totalQuantity += roll.quantity;
     });
 
     return Object.entries(summary)
-      .map(([vendorName, totals]) => ({
-        vendorName,
+      .map(([kind, totals]) => ({
+        kind,
         ...totals,
       }))
-      .sort((a, b) => a.vendorName.localeCompare(b.vendorName));
+      .sort((a, b) => a.kind.localeCompare(b.kind));
 
   }, [paperRolls, isLoading]);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Ringkasan Pemasok</CardTitle>
+        <CardTitle>Ringkasan Berdasarkan Jenis</CardTitle>
         <CardDescription>
-          Total gulungan dan kuantitas (kg) berdasarkan pemasok.
+          Total gulungan dan kuantitas (kg) berdasarkan jenis kertas.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -67,7 +67,7 @@ export function SuppliersTable() {
           <Table>
             <TableHeader className="sticky top-0 bg-background z-10">
               <TableRow>
-                <TableHead>Nama Pemasok</TableHead>
+                <TableHead>Jenis Kertas</TableHead>
                 <TableHead className="text-right">Total Gulungan</TableHead>
                 <TableHead className="text-right">Total Kuantitas (Kg)</TableHead>
               </TableRow>
@@ -75,7 +75,7 @@ export function SuppliersTable() {
             <TableBody>
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, index) => (
-                  <TableRow key={`skeleton-supplier-${index}`}>
+                  <TableRow key={`skeleton-kind-${index}`}>
                     <TableCell>
                       <Skeleton className="h-4 w-48" />
                     </TableCell>
@@ -87,15 +87,15 @@ export function SuppliersTable() {
                     </TableCell>
                   </TableRow>
                 ))
-              ) : supplierSummary.length > 0 ? (
-                supplierSummary.map((supplier) => (
-                  <TableRow key={supplier.vendorName}>
-                    <TableCell className="font-medium">{supplier.vendorName}</TableCell>
+              ) : kindSummary.length > 0 ? (
+                kindSummary.map((item) => (
+                  <TableRow key={item.kind}>
+                    <TableCell className="font-medium">{item.kind}</TableCell>
                     <TableCell className="text-right font-mono">
-                      {supplier.totalRolls.toLocaleString()}
+                      {item.totalRolls.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-right font-mono">
-                      {supplier.totalQuantity.toLocaleString(undefined, {
+                      {item.totalQuantity.toLocaleString(undefined, {
                         maximumFractionDigits: 2,
                       })}
                     </TableCell>
@@ -104,7 +104,7 @@ export function SuppliersTable() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={3} className="h-24 text-center">
-                    Tidak ada data pemasok yang ditemukan.
+                    Tidak ada data jenis yang ditemukan.
                   </TableCell>
                 </TableRow>
               )}

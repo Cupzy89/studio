@@ -8,7 +8,7 @@ import {
 import {
   LayoutDashboard,
   Warehouse,
-  Truck,
+  Layers,
   LineChart,
   FileUp,
 } from 'lucide-react';
@@ -42,7 +42,7 @@ export function DashboardNav() {
         <Link href="/suppliers">
           <SidebarMenuButton isActive={pathname === '/suppliers'} asChild>
             <span className="flex w-full items-center gap-2">
-              <Truck /> Pemasok
+              <Layers /> Ringkasan per Jenis
             </span>
           </SidebarMenuButton>
         </Link>
