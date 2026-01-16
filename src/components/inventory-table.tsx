@@ -1,5 +1,4 @@
 'use client';
-import { useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -17,77 +16,75 @@ import {
 } from '@/components/ui/table';
 import { useInventory } from '@/context/inventory-context';
 import { Skeleton } from './ui/skeleton';
-
-interface AggregatedRoll {
-  type: string;
-  rollCount: number;
-  quantity: number;
-}
+import type { PaperRoll } from '@/lib/types';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function InventoryTable() {
   const { paperRolls, isLoading } = useInventory();
-
-  const aggregatedData = useMemo(() => {
-    if (!paperRolls) {
-      return [];
-    }
-
-    const groupedData = paperRolls.reduce((acc, roll) => {
-      const kind = roll.type || 'N/A';
-      if (!acc[kind]) {
-        acc[kind] = { type: kind, rollCount: 0, quantity: 0 };
-      }
-      acc[kind].rollCount += Number(roll.rollCount) || 0;
-      acc[kind].quantity += Number(roll.quantity) || 0;
-      return acc;
-    }, {} as { [key: string]: AggregatedRoll });
-
-    return Object.values(groupedData).sort((a, b) => a.type.localeCompare(b.type));
-  }, [paperRolls]);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Inventory Stock</CardTitle>
         <CardDescription>
-          Stock paper roll
+          Tampilan mendetail dari semua gulungan kertas dalam inventaris.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Kind</TableHead>
-              <TableHead className="text-right">Roll-Cnt</TableHead>
-              <TableHead className="text-right">Qty (Kg)</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              Array.from({ length: 5 }).map((_, index) => (
-                <TableRow key={`skeleton-row-${index}`}>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-12 float-right" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-20 float-right" /></TableCell>
-                </TableRow>
-              ))
-            ) : aggregatedData.length > 0 ? (
-              aggregatedData.map((group: AggregatedRoll) => (
-                <TableRow key={group.type}>
-                  <TableCell>{group.type}</TableCell>
-                  <TableCell className="text-right font-mono">{group.rollCount}</TableCell>
-                  <TableCell className="text-right font-mono">{group.quantity.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 })}</TableCell>
-                </TableRow>
-              ))
-            ) : (
-                <TableRow>
-                    <TableCell colSpan={3} className="text-center">
-                        Tidak ada data inventaris. Silakan unggah file.
-                    </TableCell>
-                </TableRow>
-            )}
-          </TableBody>
-        </Table>
+        <ScrollArea className="h-[600px] w-full">
+          <Table>
+            <TableHeader className="sticky top-0 bg-background">
+              <TableRow>
+                <TableHead>Part No</TableHead>
+                <TableHead>Kind</TableHead>
+                <TableHead>GR Date</TableHead>
+                <TableHead>Gsm</TableHead>
+                <TableHead>Width</TableHead>
+                <TableHead className="text-right">Qty (Kg)</TableHead>
+                <TableHead className="text-right">Roll-Cnt</TableHead>
+                <TableHead>Storage Bin</TableHead>
+                <TableHead>Vendor</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                Array.from({ length: 15 }).map((_, index) => (
+                  <TableRow key={`skeleton-row-${index}`}>
+                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-20 float-right" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-12 float-right" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                  </TableRow>
+                ))
+              ) : paperRolls && paperRolls.length > 0 ? (
+                paperRolls.map((roll: PaperRoll, index: number) => (
+                  <TableRow key={`${roll.id}-${index}`}>
+                    <TableCell className="font-medium">{roll.name}</TableCell>
+                    <TableCell>{roll.type}</TableCell>
+                    <TableCell>{roll.grDate}</TableCell>
+                    <TableCell>{roll.gsm}</TableCell>
+                    <TableCell>{roll.width}</TableCell>
+                    <TableCell className="text-right font-mono">{roll.quantity.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 })}</TableCell>
+                    <TableCell className="text-right font-mono">{roll.rollCount}</TableCell>
+                    <TableCell>{roll.storageBin}</TableCell>
+                    <TableCell>{roll.vendorName}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                  <TableRow>
+                      <TableCell colSpan={9} className="h-24 text-center">
+                          Tidak ada data inventaris. Silakan unggah file.
+                      </TableCell>
+                  </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </ScrollArea>
       </CardContent>
     </Card>
   );
