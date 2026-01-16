@@ -73,7 +73,7 @@ export function UsageChart() {
         ) : chartData.length > 0 ? (
             <ChartContainer
                 config={chartConfig}
-                className="mx-auto aspect-square max-h-[300px]"
+                className="mx-auto min-h-[350px]"
             >
                 <PieChart>
                     <ChartTooltip
@@ -100,8 +100,8 @@ export function UsageChart() {
                     }
                     />
                     <ChartLegend
-                        content={<ChartLegendContent nameKey="name" />}
-                        className="-mt-2"
+                        content={<ChartLegendContent nameKey="name" className="flex-col" />}
+                        className="-mt-4"
                     />
                     <Pie
                         data={chartData}
