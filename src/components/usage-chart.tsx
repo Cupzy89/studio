@@ -73,7 +73,7 @@ export function UsageChart() {
         ) : chartData.length > 0 ? (
             <ChartContainer
                 config={chartConfig}
-                className="mx-auto min-h-[350px]"
+                className="mx-auto min-h-[300px]"
             >
                 <PieChart>
                     <ChartTooltip
@@ -107,7 +107,7 @@ export function UsageChart() {
                         data={chartData}
                         dataKey="value"
                         nameKey="name"
-                        innerRadius={60}
+                        innerRadius={50}
                         strokeWidth={5}
                         label={({
                             cx,
@@ -122,13 +122,13 @@ export function UsageChart() {
                             <tspan
                                 x={cx}
                                 y={cy}
-                                className="fill-foreground text-3xl font-bold"
+                                className="fill-foreground text-2xl font-bold"
                             >
                                 {totalQuantity.toLocaleString(undefined, {maximumFractionDigits: 0})}
                             </tspan>
                             <tspan
                                 x={cx}
-                                y={(cy || 0) + 20}
+                                y={(cy || 0) + 18}
                                 className="fill-muted-foreground"
                             >
                                 Kg Total
