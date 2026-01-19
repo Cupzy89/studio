@@ -6,7 +6,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { Boxes, Clock, Warehouse, ChevronDown } from 'lucide-react';
+import { Boxes, Clock, ChevronDown } from 'lucide-react';
 import { useInventory } from '@/context/inventory-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo, useState } from 'react';
@@ -100,7 +100,6 @@ export default function DashboardPage() {
             <div className="mt-2 grid gap-4 rounded-lg border bg-card p-4">
                <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Warehouse className="h-6 w-6 text-primary" />
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">
                       Stok R1 (Local)
