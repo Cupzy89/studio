@@ -5,10 +5,10 @@ import React, {
   useState,
   useContext,
   ReactNode,
-  useEffect,
 } from 'react';
 import type { PaperRoll } from '@/lib/types';
-import { paperRolls as initialPaperRolls } from '@/lib/data';
+import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
+import { collection } from 'firebase/firestore';
 
 export interface AgingFilter {
   min: number;
@@ -30,44 +30,30 @@ const InventoryContext = createContext<InventoryContextType | undefined>(
   undefined
 );
 
-const INVENTORY_STORAGE_KEY = 'paperRollInventory';
-
 export function InventoryProvider({ children }: { children: ReactNode }) {
-  const [paperRolls, setPaperRollsState] = useState<PaperRoll[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isUserLoading: isAuthLoading } = useUser();
+  const firestore = useFirestore();
+
+  const rollsCollectionRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return collection(firestore, 'users', user.uid, 'rolls');
+  }, [user, firestore]);
+
+  const { data: paperRollsFromFirestore, isLoading: isCollectionLoading } = 
+    useCollection<PaperRoll>(rollsCollectionRef);
+
   const [agingFilter, setAgingFilter] = useState<AgingFilter | null>(null);
   const [kindFilter, setKindFilter] = useState<string | null>(null);
 
-  // Load initial data from localStorage on client-side
-  useEffect(() => {
-    setIsLoading(true);
-    try {
-      const storedData = localStorage.getItem(INVENTORY_STORAGE_KEY);
-      if (storedData) {
-        const parsedData = JSON.parse(storedData);
-        setPaperRollsState(parsedData);
-      } else {
-        // If no data in storage, use initial data
-        setPaperRollsState(initialPaperRolls);
-        localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(initialPaperRolls));
-      }
-    } catch (error) {
-      console.error('Failed to load inventory from localStorage', error);
-      setPaperRollsState(initialPaperRolls); // Fallback to initial data
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  // Function to update state and localStorage
+  // This function is kept for compatibility with the UploadDialog, but the actual
+  // data persistence is now handled within the UploadDialog itself by writing to Firestore.
   const setPaperRolls = (rolls: PaperRoll[]) => {
-    try {
-      localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(rolls));
-      setPaperRollsState(rolls);
-    } catch (error) {
-      console.error('Failed to save inventory to localStorage', error);
-    }
+    // This is intentionally a no-op. Firestore real-time updates will refresh the state.
+    console.warn("setPaperRolls called, but inventory is now managed by Firestore real-time updates.");
   };
+  
+  const isLoading = isAuthLoading || (!!user && isCollectionLoading);
+  const paperRolls = paperRollsFromFirestore || [];
 
   return (
     <InventoryContext.Provider value={{ paperRolls, setPaperRolls, isLoading, agingFilter, setAgingFilter, kindFilter, setKindFilter }}>

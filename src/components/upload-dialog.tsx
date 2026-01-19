@@ -17,7 +17,8 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useInventory } from '@/context/inventory-context';
+import { useUser, useFirestore } from '@/firebase';
+import { writeBatch, doc } from 'firebase/firestore';
 import * as XLSX from 'xlsx';
 import type { PaperRoll } from '@/lib/types';
 import { format, parse } from 'date-fns';
@@ -41,7 +42,8 @@ const findColumn = (header: string[], possibleNames: string[]): string | undefin
 
 export function UploadDialog() {
   const { toast } = useToast();
-  const { setPaperRolls } = useInventory();
+  const { user } = useUser();
+  const firestore = useFirestore();
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -87,9 +89,18 @@ export function UploadDialog() {
       return;
     }
 
+    if (!user || !firestore) {
+      toast({
+        variant: 'destructive',
+        title: 'Anda Belum Login',
+        description: 'Silakan login untuk menyimpan data inventaris.',
+      });
+      return;
+    }
+
     setIsUploading(true);
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: 'array', cellDates: true });
@@ -197,18 +208,24 @@ export function UploadDialog() {
           };
         });
 
-        setPaperRolls(newPaperRolls);
+        const batch = writeBatch(firestore);
+        newPaperRolls.forEach((roll) => {
+          const rollRef = doc(firestore, 'users', user.uid, 'rolls', roll.id);
+          batch.set(rollRef, roll, { merge: true });
+        });
+        await batch.commit();
+
         toast({
           title: 'Unggah Berhasil',
-          description: `${newPaperRolls.length} item inventaris telah berhasil dimuat.`,
+          description: `${newPaperRolls.length} item inventaris telah berhasil dimuat ke akun Anda.`,
         });
         setIsOpen(false);
       } catch (error) {
-        console.error("Gagal mem-parsing file:", error);
+        console.error("Gagal mem-parsing atau mengunggah file:", error);
         toast({
           variant: 'destructive',
           title: 'Unggah Gagal',
-          description: `Gagal mem-parsing file. Pastikan formatnya benar. Error: ${error instanceof Error ? error.message : String(error)}`,
+          description: `Gagal mem-parsing atau menyimpan file. Pastikan formatnya benar. Error: ${error instanceof Error ? error.message : String(error)}`,
         });
       } finally {
         setIsUploading(false);
