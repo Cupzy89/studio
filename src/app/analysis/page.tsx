@@ -1,6 +1,6 @@
 'use client';
 
-import { useInventory } from '@/context/inventory-context';
+import { useInventory, type AgingFilter } from '@/context/inventory-context';
 import { useMemo } from 'react';
 import {
   Card,
@@ -18,9 +18,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useRouter } from 'next/navigation';
 
 export default function AnalysisPage() {
-  const { paperRolls, isLoading } = useInventory();
+  const { paperRolls, isLoading, setAgingFilter } = useInventory();
+  const router = useRouter();
 
   const agingStats = useMemo(() => {
     if (isLoading || !paperRolls) {
@@ -59,12 +61,21 @@ export default function AnalysisPage() {
     return categories;
   }, [paperRolls, isLoading]);
 
-  const agingData = [
-    { category: 'Di Bawah 3 Bulan', stats: agingStats.under3 },
-    { category: '3-6 Bulan', stats: agingStats['3to6'] },
-    { category: '6-12 Bulan', stats: agingStats['6to12'] },
-    { category: 'Di Atas 12 Bulan', stats: agingStats.over12 },
+  const agingData: {
+    category: string;
+    stats: { rolls: number; weight: number };
+    filter: AgingFilter;
+  }[] = [
+    { category: 'Di Bawah 3 Bulan', stats: agingStats.under3, filter: { min: 0, max: 89, label: 'Di Bawah 3 Bulan' } },
+    { category: '3-6 Bulan', stats: agingStats['3to6'], filter: { min: 90, max: 179, label: '3-6 Bulan' } },
+    { category: '6-12 Bulan', stats: agingStats['6to12'], filter: { min: 180, max: 364, label: '6-12 Bulan' } },
+    { category: 'Di Atas 12 Bulan', stats: agingStats.over12, filter: { min: 365, max: null, label: 'Di Atas 12 Bulan' } },
   ];
+
+  const handleRowClick = (filter: AgingFilter) => {
+    setAgingFilter(filter);
+    router.push('/inventory');
+  };
 
   return (
     <div className="space-y-6">
@@ -73,7 +84,7 @@ export default function AnalysisPage() {
         <CardHeader>
           <CardTitle>Rangkuman Usia Stok</CardTitle>
           <CardDescription>
-            Tabel rincian jumlah gulungan dan berat berdasarkan kategori usia.
+            Tabel rincian jumlah gulungan dan berat berdasarkan kategori usia. Klik baris untuk memfilter inventaris.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -102,7 +113,7 @@ export default function AnalysisPage() {
                 ))
               ) : (
                 agingData.map(item => (
-                  <TableRow key={item.category}>
+                  <TableRow key={item.category} onClick={() => handleRowClick(item.filter)} className="cursor-pointer hover:bg-muted">
                     <TableCell className="font-medium">{item.category}</TableCell>
                     <TableCell className="text-right font-mono">
                       {item.stats.rolls.toLocaleString()}

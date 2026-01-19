@@ -23,8 +23,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Filter, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Filter, Search, ArrowUpDown, ArrowUp, ArrowDown, X } from 'lucide-react';
 import { Label } from './ui/label';
+import { Badge } from './ui/badge';
 
 const FilterPopover = ({ title, options, selected, onSelectionChange }: { title: string, options: string[], selected: string[], onSelectionChange: (newSelection: string[]) => void }) => {
   return (
@@ -73,7 +74,7 @@ const FilterPopover = ({ title, options, selected, onSelectionChange }: { title:
 
 
 export function InventoryTable() {
-  const { paperRolls, isLoading } = useInventory();
+  const { paperRolls, isLoading, agingFilter, setAgingFilter } = useInventory();
   const [partNoSearch, setPartNoSearch] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: keyof PaperRoll; direction: 'asc' | 'desc' } | null>(null);
   const [columnFilters, setColumnFilters] = useState<{
@@ -112,8 +113,13 @@ export function InventoryTable() {
         columnFilters.storageBin.length > 0
             ? columnFilters.storageBin.includes(roll.storageBin)
             : true;
+      
+      const agingMatch = agingFilter
+        ? (roll.aging >= agingFilter.min && (agingFilter.max === null || roll.aging <= agingFilter.max))
+        : true;
 
-      return searchMatch && kindMatch && storageBinMatch;
+
+      return searchMatch && kindMatch && storageBinMatch && agingMatch;
     });
 
     if (sortConfig !== null) {
@@ -137,7 +143,7 @@ export function InventoryTable() {
     }
 
     return filtered;
-  }, [paperRolls, partNoSearch, columnFilters, sortConfig]);
+  }, [paperRolls, partNoSearch, columnFilters, sortConfig, agingFilter]);
 
   const handleFilterChange = (column: 'type' | 'storageBin') => (selection: string[]) => {
     setColumnFilters(prev => ({ ...prev, [column]: selection }));
@@ -160,14 +166,30 @@ export function InventoryTable() {
         <CardDescription>
           Tampilan mendetail dari semua gulungan kertas dalam inventaris.
         </CardDescription>
-        <div className="relative mt-2">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-                placeholder="Cari berdasarkan Part No..."
-                value={partNoSearch}
-                onChange={(e) => setPartNoSearch(e.target.value)}
-                className="pl-10 w-full md:w-1/3"
-            />
+        <div className="flex items-center gap-4 pt-2">
+            <div className="relative flex-grow">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                    placeholder="Cari berdasarkan Part No..."
+                    value={partNoSearch}
+                    onChange={(e) => setPartNoSearch(e.target.value)}
+                    className="pl-10 w-full md:w-1/2"
+                />
+            </div>
+            {agingFilter && (
+                  <Badge variant="secondary" className="py-1.5 px-3 flex items-center gap-2 text-sm">
+                      Usia: {agingFilter.label}
+                      <Button
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => setAgingFilter(null)} 
+                          className="h-5 w-5 -mr-1 rounded-full hover:bg-background/60"
+                          aria-label="Hapus filter usia"
+                      >
+                          <X className="h-3 w-3" />
+                      </Button>
+                  </Badge>
+              )}
         </div>
       </CardHeader>
       <CardContent>

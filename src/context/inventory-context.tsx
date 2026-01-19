@@ -10,10 +10,18 @@ import React, {
 import type { PaperRoll } from '@/lib/types';
 import { paperRolls as initialPaperRolls } from '@/lib/data';
 
+export interface AgingFilter {
+  min: number;
+  max: number | null;
+  label: string;
+}
+
 interface InventoryContextType {
   paperRolls: PaperRoll[];
   setPaperRolls: (rolls: PaperRoll[]) => void;
   isLoading: boolean;
+  agingFilter: AgingFilter | null;
+  setAgingFilter: (filter: AgingFilter | null) => void;
 }
 
 const InventoryContext = createContext<InventoryContextType | undefined>(
@@ -25,6 +33,7 @@ const INVENTORY_STORAGE_KEY = 'paperRollInventory';
 export function InventoryProvider({ children }: { children: ReactNode }) {
   const [paperRolls, setPaperRollsState] = useState<PaperRoll[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [agingFilter, setAgingFilter] = useState<AgingFilter | null>(null);
 
   // Load initial data from localStorage on client-side
   useEffect(() => {
@@ -58,7 +67,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <InventoryContext.Provider value={{ paperRolls, setPaperRolls, isLoading }}>
+    <InventoryContext.Provider value={{ paperRolls, setPaperRolls, isLoading, agingFilter, setAgingFilter }}>
       {children}
     </InventoryContext.Provider>
   );
