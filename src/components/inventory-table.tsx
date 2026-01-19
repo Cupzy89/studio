@@ -74,7 +74,7 @@ const FilterPopover = ({ title, options, selected, onSelectionChange }: { title:
 
 
 export function InventoryTable() {
-  const { paperRolls, isLoading, agingFilter, setAgingFilter } = useInventory();
+  const { paperRolls, isLoading, agingFilter, setAgingFilter, kindFilter, setKindFilter } = useInventory();
   const [partNoSearch, setPartNoSearch] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: keyof PaperRoll; direction: 'asc' | 'desc' } | null>(null);
   const [columnFilters, setColumnFilters] = useState<{
@@ -105,7 +105,7 @@ export function InventoryTable() {
       const searchMatch = partNoSearch
         ? roll.name.toLowerCase().includes(partNoSearch.toLowerCase())
         : true;
-      const kindMatch =
+      const kindColumnMatch =
         columnFilters.type.length > 0
           ? columnFilters.type.includes(roll.type)
           : true;
@@ -118,8 +118,10 @@ export function InventoryTable() {
         ? (roll.aging >= agingFilter.min && (agingFilter.max === null || roll.aging <= agingFilter.max))
         : true;
 
+      const kindContextMatch = kindFilter ? roll.type === kindFilter : true;
 
-      return searchMatch && kindMatch && storageBinMatch && agingMatch;
+
+      return searchMatch && kindColumnMatch && storageBinMatch && agingMatch && kindContextMatch;
     });
 
     if (sortConfig !== null) {
@@ -143,7 +145,7 @@ export function InventoryTable() {
     }
 
     return filtered;
-  }, [paperRolls, partNoSearch, columnFilters, sortConfig, agingFilter]);
+  }, [paperRolls, partNoSearch, columnFilters, sortConfig, agingFilter, kindFilter]);
 
   const handleFilterChange = (column: 'type' | 'storageBin') => (selection: string[]) => {
     setColumnFilters(prev => ({ ...prev, [column]: selection }));
@@ -166,8 +168,8 @@ export function InventoryTable() {
         <CardDescription>
           Tampilan mendetail dari semua gulungan kertas dalam inventaris.
         </CardDescription>
-        <div className="flex items-center gap-4 pt-2">
-            <div className="relative flex-grow">
+        <div className="flex flex-wrap items-center gap-4 pt-2">
+            <div className="relative flex-grow min-w-[200px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input 
                     placeholder="Cari berdasarkan Part No..."
@@ -176,20 +178,36 @@ export function InventoryTable() {
                     className="pl-10 w-full md:w-1/2"
                 />
             </div>
-            {agingFilter && (
-                  <Badge variant="secondary" className="py-1.5 px-3 flex items-center gap-2 text-sm">
-                      Usia: {agingFilter.label}
-                      <Button
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => setAgingFilter(null)} 
-                          className="h-5 w-5 -mr-1 rounded-full hover:bg-background/60"
-                          aria-label="Hapus filter usia"
-                      >
-                          <X className="h-3 w-3" />
-                      </Button>
-                  </Badge>
-              )}
+            <div className="flex items-center gap-2">
+              {agingFilter && (
+                    <Badge variant="secondary" className="py-1.5 px-3 flex items-center gap-2 text-sm">
+                        Usia: {agingFilter.label}
+                        <Button
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => setAgingFilter(null)} 
+                            className="h-5 w-5 -mr-1 rounded-full hover:bg-background/60"
+                            aria-label="Hapus filter usia"
+                        >
+                            <X className="h-3 w-3" />
+                        </Button>
+                    </Badge>
+                )}
+                {kindFilter && (
+                    <Badge variant="secondary" className="py-1.5 px-3 flex items-center gap-2 text-sm">
+                        Jenis: {kindFilter}
+                        <Button
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => setKindFilter(null)} 
+                            className="h-5 w-5 -mr-1 rounded-full hover:bg-background/60"
+                            aria-label="Hapus filter jenis"
+                        >
+                            <X className="h-3 w-3" />
+                        </Button>
+                    </Badge>
+                )}
+            </div>
         </div>
       </CardHeader>
       <CardContent>

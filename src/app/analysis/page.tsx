@@ -1,7 +1,7 @@
 'use client';
 
 import { useInventory, type AgingFilter } from '@/context/inventory-context';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -18,11 +18,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useRouter } from 'next/navigation';
+import { KindBreakdownDialog } from '@/components/kind-breakdown-dialog';
 
 export default function AnalysisPage() {
-  const { paperRolls, isLoading, setAgingFilter } = useInventory();
-  const router = useRouter();
+  const { paperRolls, isLoading } = useInventory();
+  const [selectedFilter, setSelectedFilter] = useState<AgingFilter | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const agingStats = useMemo(() => {
     if (isLoading || !paperRolls) {
@@ -73,8 +74,8 @@ export default function AnalysisPage() {
   ];
 
   const handleRowClick = (filter: AgingFilter) => {
-    setAgingFilter(filter);
-    router.push('/inventory');
+    setSelectedFilter(filter);
+    setIsDialogOpen(true);
   };
 
   return (
@@ -84,7 +85,7 @@ export default function AnalysisPage() {
         <CardHeader>
           <CardTitle>Rangkuman Usia Stok</CardTitle>
           <CardDescription>
-            Tabel rincian jumlah gulungan dan berat berdasarkan kategori usia. Klik baris untuk memfilter inventaris.
+            Tabel rincian jumlah gulungan dan berat berdasarkan kategori usia. Klik baris untuk melihat rincian per jenis.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -130,6 +131,11 @@ export default function AnalysisPage() {
           </Table>
         </CardContent>
       </Card>
+      <KindBreakdownDialog 
+        isOpen={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        agingFilter={selectedFilter}
+      />
     </div>
   );
 }

@@ -22,6 +22,8 @@ interface InventoryContextType {
   isLoading: boolean;
   agingFilter: AgingFilter | null;
   setAgingFilter: (filter: AgingFilter | null) => void;
+  kindFilter: string | null;
+  setKindFilter: (filter: string | null) => void;
 }
 
 const InventoryContext = createContext<InventoryContextType | undefined>(
@@ -34,6 +36,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   const [paperRolls, setPaperRollsState] = useState<PaperRoll[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [agingFilter, setAgingFilter] = useState<AgingFilter | null>(null);
+  const [kindFilter, setKindFilter] = useState<string | null>(null);
 
   // Load initial data from localStorage on client-side
   useEffect(() => {
@@ -67,7 +70,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <InventoryContext.Provider value={{ paperRolls, setPaperRolls, isLoading, agingFilter, setAgingFilter }}>
+    <InventoryContext.Provider value={{ paperRolls, setPaperRolls, isLoading, agingFilter, setAgingFilter, kindFilter, setKindFilter }}>
       {children}
     </InventoryContext.Provider>
   );
