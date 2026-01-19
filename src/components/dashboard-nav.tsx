@@ -38,9 +38,13 @@ export function DashboardNav() {
         </Link>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <SidebarMenuButton>
-          <LineChart /> Analisis
-        </SidebarMenuButton>
+        <Link href="/analysis">
+          <SidebarMenuButton isActive={pathname === '/analysis'} asChild>
+            <span className="flex w-full items-center gap-2">
+              <LineChart /> Analisis
+            </span>
+          </SidebarMenuButton>
+        </Link>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <UploadDialog />
