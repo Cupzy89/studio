@@ -33,16 +33,7 @@ export function DashboardNav() {
         <Link href="/inventory">
           <SidebarMenuButton isActive={pathname === '/inventory'} asChild>
             <span className="flex w-full items-center gap-2">
-              <Warehouse /> Inventaris
-            </span>
-          </SidebarMenuButton>
-        </Link>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <Link href="/suppliers">
-          <SidebarMenuButton isActive={pathname === '/suppliers'} asChild>
-            <span className="flex w-full items-center gap-2">
-              <Layers /> Ringkasan per Jenis
+              <Layers /> Inventaris per Jenis
             </span>
           </SidebarMenuButton>
         </Link>
