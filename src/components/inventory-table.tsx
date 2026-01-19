@@ -87,7 +87,7 @@ export function InventoryTable() {
   });
 
   const { uniqueKinds, uniqueVendors, uniqueStorageBins } = useMemo(() => {
-    if (isLoading) return { uniqueKinds: [], uniqueVendors: [], uniqueStorageBins: [] };
+    if (isLoading || !paperRolls) return { uniqueKinds: [], uniqueVendors: [], uniqueStorageBins: [] };
     const kinds = [...new Set(paperRolls.map((roll) => roll.type).filter(Boolean))].sort();
     const vendors = [...new Set(paperRolls.map((roll) => roll.vendorName).filter(Boolean))].sort();
     const bins = [...new Set(paperRolls.map((roll) => roll.storageBin).filter(Boolean))].sort();
@@ -273,8 +273,8 @@ export function InventoryTable() {
                   </TableRow>
                 ))
               ) : sortedAndFilteredRolls.length > 0 ? (
-                sortedAndFilteredRolls.map((roll: PaperRoll, index: number) => (
-                  <TableRow key={`${roll.id || 'row'}-${index}`}>
+                sortedAndFilteredRolls.map((roll, index) => (
+                  <TableRow key={roll.id || index}>
                     <TableCell className="font-medium">{roll.name}</TableCell>
                     <TableCell>{roll.type}</TableCell>
                     <TableCell>{roll.grDate}</TableCell>

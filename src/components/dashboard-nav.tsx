@@ -8,7 +8,6 @@ import {
 import {
   LayoutDashboard,
   Warehouse,
-  Layers,
   LineChart,
   FileUp,
 } from 'lucide-react';
@@ -25,6 +24,15 @@ export function DashboardNav() {
           <SidebarMenuButton isActive={pathname === '/'} asChild>
             <span className="flex w-full items-center gap-2">
               <LayoutDashboard /> Dashboard
+            </span>
+          </SidebarMenuButton>
+        </Link>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <Link href="/inventory">
+          <SidebarMenuButton isActive={pathname === '/inventory'} asChild>
+            <span className="flex w-full items-center gap-2">
+              <Warehouse /> Inventory Stock
             </span>
           </SidebarMenuButton>
         </Link>
