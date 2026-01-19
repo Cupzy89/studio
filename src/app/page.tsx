@@ -103,14 +103,14 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3">
                   <div>
                     <div className="mb-1">
-                      <Badge variant="secondary">Stok R1 (Local)</Badge>
+                      <Badge variant="secondary">Stok R1 (Lokal)</Badge>
                     </div>
                     <p className="text-lg font-bold">
                       {stats.localStockRolls.toLocaleString()} Gulungan
                     </p>
                   </div>
                 </div>
-                <p className="text-sm font-mono text-muted-foreground">
+                <p className="text-sm font-mono font-bold">
                   {stats.localStockWeight.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg
                 </p>
               </div>
@@ -118,14 +118,14 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3">
                   <div>
                     <div className="mb-1">
-                      <Badge variant="secondary">Stok R2 (Old)</Badge>
+                      <Badge variant="secondary">Stok R2 (Lama)</Badge>
                     </div>
                     <p className="text-lg font-bold">
                       {stats.oldStockRolls.toLocaleString()} Gulungan
                     </p>
                   </div>
                 </div>
-                <p className="text-sm font-mono text-muted-foreground">
+                <p className="text-sm font-mono font-bold">
                    {stats.oldStockWeight.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg
                 </p>
               </div>
