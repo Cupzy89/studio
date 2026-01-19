@@ -30,15 +30,6 @@ export function DashboardNav() {
         </Link>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <Link href="/inventory">
-          <SidebarMenuButton isActive={pathname === '/inventory'} asChild>
-            <span className="flex w-full items-center gap-2">
-              <Layers /> Inventaris per Jenis
-            </span>
-          </SidebarMenuButton>
-        </Link>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
         <SidebarMenuButton>
           <LineChart /> Analisis
         </SidebarMenuButton>
