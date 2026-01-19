@@ -78,20 +78,17 @@ export function InventoryTable() {
   const [sortConfig, setSortConfig] = useState<{ key: keyof PaperRoll; direction: 'asc' | 'desc' } | null>(null);
   const [columnFilters, setColumnFilters] = useState<{
     type: string[];
-    vendorName: string[];
     storageBin: string[];
   }>({
     type: [],
-    vendorName: [],
     storageBin: []
   });
 
-  const { uniqueKinds, uniqueVendors, uniqueStorageBins } = useMemo(() => {
-    if (isLoading || !paperRolls) return { uniqueKinds: [], uniqueVendors: [], uniqueStorageBins: [] };
+  const { uniqueKinds, uniqueStorageBins } = useMemo(() => {
+    if (isLoading || !paperRolls) return { uniqueKinds: [], uniqueStorageBins: [] };
     const kinds = [...new Set(paperRolls.map((roll) => roll.type).filter(Boolean))].sort();
-    const vendors = [...new Set(paperRolls.map((roll) => roll.vendorName).filter(Boolean))].sort();
     const bins = [...new Set(paperRolls.map((roll) => roll.storageBin).filter(Boolean))].sort();
-    return { uniqueKinds: kinds, uniqueVendors: vendors, uniqueStorageBins: bins };
+    return { uniqueKinds: kinds, uniqueStorageBins: bins };
   }, [paperRolls, isLoading]);
 
   const requestSort = (key: keyof PaperRoll) => {
@@ -111,16 +108,12 @@ export function InventoryTable() {
         columnFilters.type.length > 0
           ? columnFilters.type.includes(roll.type)
           : true;
-      const vendorMatch =
-        columnFilters.vendorName.length > 0
-          ? columnFilters.vendorName.includes(roll.vendorName)
-          : true;
       const storageBinMatch =
         columnFilters.storageBin.length > 0
             ? columnFilters.storageBin.includes(roll.storageBin)
             : true;
 
-      return searchMatch && kindMatch && vendorMatch && storageBinMatch;
+      return searchMatch && kindMatch && storageBinMatch;
     });
 
     if (sortConfig !== null) {
@@ -146,7 +139,7 @@ export function InventoryTable() {
     return filtered;
   }, [paperRolls, partNoSearch, columnFilters, sortConfig]);
 
-  const handleFilterChange = (column: 'type' | 'vendorName' | 'storageBin') => (selection: string[]) => {
+  const handleFilterChange = (column: 'type' | 'storageBin') => (selection: string[]) => {
     setColumnFilters(prev => ({ ...prev, [column]: selection }));
   }
   
@@ -242,19 +235,6 @@ export function InventoryTable() {
                       />
                     </div>
                 </TableHead>
-                <TableHead>
-                     <div className="flex items-center -ml-2">
-                        <Button variant="ghost" onClick={() => requestSort('vendorName')} className="px-1 py-1 h-auto">
-                           Vendor {getSortIcon('vendorName')}
-                        </Button>
-                        <FilterPopover 
-                            title="Vendor"
-                            options={uniqueVendors}
-                            selected={columnFilters.vendorName}
-                            onSelectionChange={handleFilterChange('vendorName')}
-                        />
-                    </div>
-                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -269,7 +249,6 @@ export function InventoryTable() {
                     <TableCell><Skeleton className="h-4 w-20 float-right" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-12 float-right" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                   </TableRow>
                 ))
               ) : sortedAndFilteredRolls.length > 0 ? (
@@ -283,12 +262,11 @@ export function InventoryTable() {
                     <TableCell className="text-right font-mono">{roll.quantity.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 })}</TableCell>
                     <TableCell className="text-right font-mono">{roll.rollCount}</TableCell>
                     <TableCell>{roll.storageBin}</TableCell>
-                    <TableCell>{roll.vendorName}</TableCell>
                   </TableRow>
                 ))
               ) : (
                   <TableRow>
-                      <TableCell colSpan={9} className="h-24 text-center">
+                      <TableCell colSpan={8} className="h-24 text-center">
                           Tidak ada hasil yang ditemukan.
                       </TableCell>
                   </TableRow>
