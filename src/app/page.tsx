@@ -11,6 +11,7 @@ import { useInventory } from '@/context/inventory-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 export default function DashboardPage() {
   const { paperRolls, isLoading } = useInventory();
@@ -101,9 +102,9 @@ export default function DashboardPage() {
                <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Stok R1 (Local)
-                    </p>
+                    <div className="mb-1">
+                      <Badge variant="secondary">Stok R1 (Local)</Badge>
+                    </div>
                     <p className="text-lg font-bold">
                       {stats.localStockRolls.toLocaleString()} Gulungan
                     </p>
@@ -116,9 +117,9 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Stok R2 (Old)
-                    </p>
+                    <div className="mb-1">
+                      <Badge variant="secondary">Stok R2 (Old)</Badge>
+                    </div>
                     <p className="text-lg font-bold">
                       {stats.oldStockRolls.toLocaleString()} Gulungan
                     </p>
