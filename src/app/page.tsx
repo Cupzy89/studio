@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Layers,
+  Warehouse,
   AlertTriangle,
   Boxes,
 } from 'lucide-react';
@@ -16,19 +16,19 @@ import { useMemo } from 'react';
 export default function DashboardPage() {
   const { paperRolls, isLoading } = useInventory();
   
-  const { totalWeight, totalRolls, uniqueKindsCount, lowStockCount } = useMemo(() => {
+  const { totalWeight, totalRolls, uniqueStorageBinsCount, lowStockCount } = useMemo(() => {
     if (isLoading || !paperRolls) {
-      return { totalWeight: 0, totalRolls: 0, uniqueKindsCount: 0, lowStockCount: 0 };
+      return { totalWeight: 0, totalRolls: 0, uniqueStorageBinsCount: 0, lowStockCount: 0 };
     }
     
     const totalWeight = paperRolls.reduce((sum, roll) => sum + roll.quantity, 0);
     const totalRolls = paperRolls.reduce((sum, roll) => sum + roll.rollCount, 0);
-    const uniqueKinds = [...new Set(paperRolls.map(roll => roll.type).filter(Boolean))];
+    const uniqueStorageBins = [...new Set(paperRolls.map(roll => roll.storageBin).filter(Boolean))];
     const lowStockCount = paperRolls.filter(
       (roll) => roll.quantity < roll.reorderLevel
     ).length;
 
-    return { totalWeight, totalRolls, uniqueKindsCount: uniqueKinds.length, lowStockCount };
+    return { totalWeight, totalRolls, uniqueStorageBinsCount: uniqueStorageBins.length, lowStockCount };
   }, [paperRolls, isLoading]);
 
   return (
@@ -57,18 +57,18 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Jenis Kertas Unik
+              Lokasi Penyimpanan
             </CardTitle>
-            <Layers className="h-4 w-4 text-muted-foreground" />
+            <Warehouse className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
              {isLoading ? (
                 <Skeleton className="h-10 w-3/4" />
             ) : (
                 <>
-                    <div className="text-2xl font-bold">{uniqueKindsCount}</div>
+                    <div className="text-2xl font-bold">{uniqueStorageBinsCount}</div>
                     <p className="text-xs text-muted-foreground">
-                    Total jenis kertas dalam stok
+                    Total lokasi penyimpanan unik
                     </p>
                 </>
             )}
