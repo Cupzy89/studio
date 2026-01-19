@@ -12,11 +12,11 @@ service cloud.firestore {
     }
 
     // --- Schema Validation Functions ---
-    function isValidUser(data) {
+    function isValidUserOnCreate(data) {
       return data.id == request.auth.uid
         && data.username is string && data.username.size() > 0
         && data.email is string && data.email.matches('.+@.+\\..+')
-        && data.registrationDate is timestamp;
+        && data.registrationDate == request.time;
     }
     
     function isImmutableUserFields(data) {
@@ -36,7 +36,7 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isOwner(userId);
       allow list: if false; // Deny listing all users for privacy
-      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow create: if isOwner(userId) && isValidUserOnCreate(request.resource.data);
       allow update: if isOwner(userId) && isImmutableUserFields(request.resource.data);
       allow delete: if isOwner(userId);
 
