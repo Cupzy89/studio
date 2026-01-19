@@ -67,13 +67,13 @@ export function UsageChart() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-            <div className="flex justify-center items-center h-[300px]">
-                 <Skeleton className="aspect-square h-full w-full max-h-[300px] rounded-full" />
+            <div className="flex justify-center items-center h-[350px]">
+                 <Skeleton className="aspect-square h-full w-full max-h-[250px] rounded-full" />
             </div>
         ) : chartData.length > 0 ? (
             <ChartContainer
                 config={chartConfig}
-                className="mx-auto min-h-[300px]"
+                className="mx-auto aspect-square max-h-[350px]"
             >
                 <PieChart>
                     <ChartTooltip
@@ -101,7 +101,7 @@ export function UsageChart() {
                     />
                     <ChartLegend
                         content={<ChartLegendContent nameKey="name" className="flex-col" />}
-                        className="-mt-4"
+                        className="-translate-y-4"
                     />
                     <Pie
                         data={chartData}
@@ -122,14 +122,14 @@ export function UsageChart() {
                             <tspan
                                 x={cx}
                                 y={cy}
-                                className="fill-foreground text-2xl font-bold"
+                                className="fill-foreground text-lg font-bold"
                             >
                                 {totalQuantity.toLocaleString(undefined, {maximumFractionDigits: 0})}
                             </tspan>
                             <tspan
                                 x={cx}
-                                y={(cy || 0) + 18}
-                                className="fill-muted-foreground"
+                                y={(cy || 0) + 14}
+                                className="fill-muted-foreground text-xs"
                             >
                                 Kg Total
                             </tspan>
@@ -140,7 +140,7 @@ export function UsageChart() {
                 </PieChart>
             </ChartContainer>
         ) : (
-             <div className="flex flex-col h-[300px] w-full items-center justify-center rounded-lg border-dashed border-2">
+             <div className="flex flex-col h-[350px] w-full items-center justify-center rounded-lg border-dashed border-2">
                 <p className="text-sm text-muted-foreground">Tidak ada data untuk ditampilkan.</p>
              </div>
         )}
