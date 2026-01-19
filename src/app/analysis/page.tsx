@@ -2,9 +2,22 @@
 
 import { useInventory } from '@/context/inventory-context';
 import { useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Clock } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 export default function AnalysisPage() {
   const { paperRolls, isLoading } = useInventory();
@@ -46,39 +59,66 @@ export default function AnalysisPage() {
     return categories;
   }, [paperRolls, isLoading]);
 
-  const StatCard = ({ title, rolls, weight, isLoading }: { title: string, rolls: number, weight: number, isLoading: boolean }) => (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Clock className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-          </div>
-        ) : (
-          <>
-            <div className="text-2xl font-bold">{rolls.toLocaleString()} Gulungan</div>
-            <p className="text-xs text-muted-foreground">
-              {weight.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg total berat
-            </p>
-          </>
-        )}
-      </CardContent>
-    </Card>
-  );
+  const agingData = [
+    { category: 'Di Bawah 3 Bulan', stats: agingStats.under3 },
+    { category: '3-6 Bulan', stats: agingStats['3to6'] },
+    { category: '6-12 Bulan', stats: agingStats['6to12'] },
+    { category: 'Di Atas 12 Bulan', stats: agingStats.over12 },
+  ];
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold tracking-tight">Analisis Usia Stok</h1>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Di Bawah 3 Bulan" rolls={agingStats.under3.rolls} weight={agingStats.under3.weight} isLoading={isLoading} />
-        <StatCard title="3-6 Bulan" rolls={agingStats['3to6'].rolls} weight={agingStats['3to6'].weight} isLoading={isLoading} />
-        <StatCard title="6-12 Bulan" rolls={agingStats['6to12'].rolls} weight={agingStats['6to12'].weight} isLoading={isLoading} />
-        <StatCard title="Di Atas 12 Bulan" rolls={agingStats.over12.rolls} weight={agingStats.over12.weight} isLoading={isLoading} />
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Rangkuman Usia Stok</CardTitle>
+          <CardDescription>
+            Tabel rincian jumlah gulungan dan berat berdasarkan kategori usia.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Kategori Usia</TableHead>
+                <TableHead className="text-right">Jumlah Gulungan</TableHead>
+                <TableHead className="text-right">Total Berat (kg)</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                Array.from({ length: 4 }).map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell>
+                      <Skeleton className="h-4 w-24" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-20 float-right" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-28 float-right" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                agingData.map(item => (
+                  <TableRow key={item.category}>
+                    <TableCell className="font-medium">{item.category}</TableCell>
+                    <TableCell className="text-right font-mono">
+                      {item.stats.rolls.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right font-mono">
+                      {item.stats.weight.toLocaleString(undefined, {
+                        maximumFractionDigits: 0,
+                      })}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }
