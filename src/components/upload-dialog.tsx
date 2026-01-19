@@ -48,20 +48,18 @@ export function UploadDialog() {
 
   const handleDownloadTemplate = () => {
     const headers = [
-      'GR date',
+      'GR Date',
       'Part No',
       'Kind',
       'Gsm',
       'Width',
-      'SU No',
+      'Su No',
       'Qty',
       'Roll-Cnt',
-      'storage Bin',
+      'Storage',
       'Aging',
       'Batch',
-      'Diameter (Cm)',
       'Length',
-      'Vendor Name',
     ];
     const csvContent = 'data:text/csv;charset=utf-8,' + headers.join(',') + '\n';
     const encodedUri = encodeURI(csvContent);
@@ -123,7 +121,7 @@ export function UploadDialog() {
         const header: string[] = headerRow.map(h => String(h));
         
         const keyMap = {
-          id: findColumn(header, ['SU No', 'SU_No', 'SU-No', 'id']),
+          id: findColumn(header, ['SU No', 'SU_No', 'SU-No', 'id', 'Su No']),
           name: findColumn(header, ['Part No', 'Part_No', 'Part-No', 'name']),
           type: findColumn(header, ['Kind', 'type']),
           grDate: findColumn(header, ['GR date', 'GR_date', 'GR-date', 'grDate']),
@@ -131,7 +129,7 @@ export function UploadDialog() {
           width: findColumn(header, ['Width', 'width']),
           quantity: findColumn(header, ['Qty', 'quantity']),
           rollCount: findColumn(header, ['Roll-Cnt', 'Roll Cnt', 'Roll_Cnt', 'rollCount']),
-          storageBin: findColumn(header, ['storage Bin', 'Storage Bin', 'storage_bin', 'storageBin']),
+          storageBin: findColumn(header, ['storage Bin', 'Storage Bin', 'storage_bin', 'storageBin', 'Storage']),
           aging: findColumn(header, ['Aging', 'aging']),
           batch: findColumn(header, ['Batch', 'batch']),
           diameter: findColumn(header, ['Diameter (Cm)', 'Diameter', 'diameter']),
