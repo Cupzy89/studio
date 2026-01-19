@@ -1,3 +1,5 @@
+'use client';
+
 import { SuppliersTable } from '@/components/suppliers-table';
 
 export default function InventoryPage() {
