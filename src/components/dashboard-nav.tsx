@@ -24,7 +24,7 @@ export function DashboardNav() {
         <Link href="/">
           <SidebarMenuButton isActive={pathname === '/'} asChild>
             <span className="flex w-full items-center gap-2">
-              <LayoutDashboard /> Dasbor
+              <LayoutDashboard /> Dashboard
             </span>
           </SidebarMenuButton>
         </Link>
