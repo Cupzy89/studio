@@ -208,6 +208,16 @@ export function InventoryTable() {
                     Width {getSortIcon('width')}
                   </Button>
                 </TableHead>
+                 <TableHead>
+                  <Button variant="ghost" onClick={() => requestSort('length')} className="px-1 py-1 h-auto -ml-2">
+                    Length {getSortIcon('length')}
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button variant="ghost" onClick={() => requestSort('aging')} className="px-1 py-1 h-auto -ml-2">
+                    Aging {getSortIcon('aging')}
+                  </Button>
+                </TableHead>
                 <TableHead className="text-right">
                    <div className="flex items-center justify-end -mr-2">
                       <Button variant="ghost" onClick={() => requestSort('quantity')} className="px-1 py-1 h-auto">
@@ -246,19 +256,23 @@ export function InventoryTable() {
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-20 float-right" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-12 float-right" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-16" /></TableCell>
                   </TableRow>
                 ))
               ) : sortedAndFilteredRolls.length > 0 ? (
-                sortedAndFilteredRolls.map((roll, index) => (
-                  <TableRow key={roll.id || index}>
+                sortedAndFilteredRolls.map((roll) => (
+                  <TableRow key={roll.id}>
                     <TableCell className="font-medium">{roll.name}</TableCell>
                     <TableCell>{roll.type}</TableCell>
                     <TableCell>{roll.grDate}</TableCell>
                     <TableCell>{roll.gsm}</TableCell>
                     <TableCell>{roll.width}</TableCell>
+                    <TableCell>{roll.length}</TableCell>
+                    <TableCell>{roll.aging}</TableCell>
                     <TableCell className="text-right font-mono">{roll.quantity.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 })}</TableCell>
                     <TableCell className="text-right font-mono">{roll.rollCount}</TableCell>
                     <TableCell>{roll.storageBin}</TableCell>
@@ -266,7 +280,7 @@ export function InventoryTable() {
                 ))
               ) : (
                   <TableRow>
-                      <TableCell colSpan={8} className="h-24 text-center">
+                      <TableCell colSpan={10} className="h-24 text-center">
                           Tidak ada hasil yang ditemukan.
                       </TableCell>
                   </TableRow>
