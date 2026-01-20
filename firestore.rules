@@ -26,8 +26,8 @@ service cloud.firestore {
     }
 
     function isValidRoll(data) {
-        return data.name is string
-            && data.type is string
+        return data.name is string && data.name.size() > 0
+            && data.type is string && data.type.size() > 0
             && data.quantity is number
             && data.rollCount is number;
     }
@@ -43,7 +43,8 @@ service cloud.firestore {
       match /rolls/{rollId} {
         allow read, list: if isOwner(userId);
         allow create: if isOwner(userId) && isValidRoll(request.resource.data);
-        allow update, delete: if isOwner(userId);
+        allow update: if isOwner(userId) && isValidRoll(request.resource.data);
+        allow delete: if isOwner(userId);
       }
     }
   }
