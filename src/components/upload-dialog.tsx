@@ -12,7 +12,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { SidebarMenuButton } from '@/components/ui/sidebar';
-import { FileUp, Download, Upload } from 'lucide-react';
+import { FileUp, Download, Upload, AlertTriangle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -22,6 +22,7 @@ import { writeBatch, doc, getDocs, collection } from 'firebase/firestore';
 import * as XLSX from 'xlsx';
 import type { PaperRoll } from '@/lib/types';
 import { format, parse } from 'date-fns';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 // Function to convert Excel serial date to JS Date
 const excelDateToJSDate = (serial: number) => {
@@ -245,12 +246,19 @@ export function UploadDialog() {
           description: `Data lama dihapus. ${newPaperRolls.length} item inventaris baru telah dimuat.`,
         });
         setIsOpen(false);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Gagal mem-parsing atau mengunggah file:", error);
+        
+        let description = `Gagal mem-parsing atau menyimpan file. Pastikan formatnya benar. Error: ${error.message || String(error)}`;
+
+        if (error?.code === 'resource-exhausted') {
+            description = 'Operasi gagal karena kuota Firestore Anda terlampaui. Ini sering terjadi saat mengunggah file besar. Harap coba lagi nanti atau pertimbangkan untuk meningkatkan paket Firebase Anda.';
+        }
+
         toast({
           variant: 'destructive',
           title: 'Unggah Gagal',
-          description: `Gagal mem-parsing atau menyimpan file. Pastikan formatnya benar. Error: ${error instanceof Error ? error.message : String(error)}`,
+          description: description,
         });
       } finally {
         setIsUploading(false);
@@ -286,6 +294,13 @@ export function UploadDialog() {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
+          <Alert>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Perhatian</AlertTitle>
+            <AlertDescription>
+              Mengunggah file besar akan memakai kuota Firestore Anda secara signifikan. Jika unggahan gagal, kemungkinan kuota Anda telah habis.
+            </AlertDescription>
+          </Alert>
           <div className="flex flex-col gap-4 rounded-lg border p-4">
             <div className="flex items-start justify-between">
               <div>
