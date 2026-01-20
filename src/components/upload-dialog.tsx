@@ -208,12 +208,18 @@ export function UploadDialog() {
           };
         });
 
-        const batch = writeBatch(firestore);
-        newPaperRolls.forEach((roll) => {
-          const rollRef = doc(firestore, 'users', user.uid, 'rolls', roll.id);
-          batch.set(rollRef, roll, { merge: true });
-        });
-        await batch.commit();
+        const BATCH_SIZE = 499; // Firestore limit is 500
+        const promises = [];
+        for (let i = 0; i < newPaperRolls.length; i += BATCH_SIZE) {
+          const chunk = newPaperRolls.slice(i, i + BATCH_SIZE);
+          const batch = writeBatch(firestore);
+          chunk.forEach((roll) => {
+            const rollRef = doc(firestore, 'users', user.uid, 'rolls', roll.id);
+            batch.set(rollRef, roll, { merge: true });
+          });
+          promises.push(batch.commit());
+        }
+        await Promise.all(promises);
 
         toast({
           title: 'Unggah Berhasil',
