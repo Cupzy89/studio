@@ -179,16 +179,27 @@ export function UploadDialog() {
             }
           }
           
-          let idValue: string | number | null = keyMap.id ? row[keyMap.id] : null;
+          const idValue: string | number | null = keyMap.id ? row[keyMap.id] : null;
+          let finalId: string;
 
           if (idValue === null || String(idValue).trim() === '') {
-             const compositeKey = Object.values(row).join('-') + `-${index}`;
-              idValue = compositeKey;
+            const compositeKey = Object.values(row).filter(v => v !== null).join('-') + `-${index}`;
+            finalId = compositeKey;
+          } else {
+            finalId = String(idValue);
+          }
+
+          // Sanitize the ID to remove invalid characters for Firestore document IDs, like forward slashes.
+          finalId = finalId.replace(/\//g, '_');
+          
+          // Ensure the ID is not an empty string.
+          if (finalId.trim() === '') {
+            finalId = `autogen_row_${index}`;
           }
 
 
           return {
-            id: String(idValue),
+            id: finalId,
             name: String((keyMap.name ? row[keyMap.name] : '') || `Part ${index + 1}`),
             type: String((keyMap.type ? row[keyMap.type] : '') || 'N/A'),
             grDate: grDateStr,
