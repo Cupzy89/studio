@@ -74,7 +74,18 @@ const FilterPopover = ({ title, options, selected, onSelectionChange }: { title:
 
 
 export function InventoryTable() {
-  const { paperRolls, isLoading, agingFilter, setAgingFilter, kindFilter, setKindFilter } = useInventory();
+  const { 
+    paperRolls, 
+    isLoading, 
+    agingFilter, 
+    setAgingFilter, 
+    kindFilter, 
+    setKindFilter,
+    gsmFilter,
+    setGsmFilter,
+    widthFilter,
+    setWidthFilter,
+   } = useInventory();
   const [partNoSearch, setPartNoSearch] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: keyof PaperRoll; direction: 'asc' | 'desc' } | null>(null);
   const [columnFilters, setColumnFilters] = useState<{
@@ -119,9 +130,11 @@ export function InventoryTable() {
         : true;
 
       const kindContextMatch = kindFilter ? roll.type === kindFilter : true;
+      const gsmMatch = gsmFilter ? roll.gsm === gsmFilter : true;
+      const widthMatch = widthFilter ? roll.width === widthFilter : true;
 
 
-      return searchMatch && kindColumnMatch && storageBinMatch && agingMatch && kindContextMatch;
+      return searchMatch && kindColumnMatch && storageBinMatch && agingMatch && kindContextMatch && gsmMatch && widthMatch;
     });
 
     if (sortConfig !== null) {
@@ -145,7 +158,7 @@ export function InventoryTable() {
     }
 
     return filtered;
-  }, [paperRolls, partNoSearch, columnFilters, sortConfig, agingFilter, kindFilter]);
+  }, [paperRolls, partNoSearch, columnFilters, sortConfig, agingFilter, kindFilter, gsmFilter, widthFilter]);
 
   const handleFilterChange = (column: 'type' | 'storageBin') => (selection: string[]) => {
     setColumnFilters(prev => ({ ...prev, [column]: selection }));
@@ -178,7 +191,7 @@ export function InventoryTable() {
                     className="pl-10 w-full md:w-1/2"
                 />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {agingFilter && (
                     <Badge variant="secondary" className="py-1.5 px-3 flex items-center gap-2 text-sm">
                         Usia: {agingFilter.label}
@@ -202,6 +215,34 @@ export function InventoryTable() {
                             onClick={() => setKindFilter(null)} 
                             className="h-5 w-5 -mr-1 rounded-full hover:bg-background/60"
                             aria-label="Hapus filter jenis"
+                        >
+                            <X className="h-3 w-3" />
+                        </Button>
+                    </Badge>
+                )}
+                {gsmFilter && (
+                    <Badge variant="secondary" className="py-1.5 px-3 flex items-center gap-2 text-sm">
+                        GSM: {gsmFilter}
+                        <Button
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => setGsmFilter(null)} 
+                            className="h-5 w-5 -mr-1 rounded-full hover:bg-background/60"
+                            aria-label="Hapus filter gsm"
+                        >
+                            <X className="h-3 w-3" />
+                        </Button>
+                    </Badge>
+                )}
+                {widthFilter && (
+                    <Badge variant="secondary" className="py-1.5 px-3 flex items-center gap-2 text-sm">
+                        Lebar: {widthFilter}
+                        <Button
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => setWidthFilter(null)} 
+                            className="h-5 w-5 -mr-1 rounded-full hover:bg-background/60"
+                            aria-label="Hapus filter lebar"
                         >
                             <X className="h-3 w-3" />
                         </Button>

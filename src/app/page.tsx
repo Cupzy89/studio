@@ -26,9 +26,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
-  const { paperRolls, isLoading } = useInventory();
+  const {
+    paperRolls,
+    isLoading,
+    setKindFilter,
+    setGsmFilter,
+    setWidthFilter,
+    setAgingFilter,
+  } = useInventory();
+  const router = useRouter();
+
   const [isOpen, setIsOpen] = useState(false);
 
   // State for expanded rows
@@ -68,6 +78,19 @@ export default function DashboardPage() {
       }
       return newSet;
     });
+  };
+
+  const handleWidthClick = (kind: string, gsm: string, width: string) => {
+    // Clear other filters that might conflict from other pages
+    setAgingFilter(null);
+    
+    // Set the new filters
+    setKindFilter(kind);
+    setGsmFilter(Number(gsm));
+    setWidthFilter(Number(width));
+    
+    // Navigate to the inventory page
+    router.push('/inventory');
   };
 
   const stats = useMemo(() => {
@@ -391,7 +414,8 @@ export default function DashboardPage() {
                                         }) => (
                                           <TableRow
                                             key={`${gsmKey}-${width}`}
-                                            className="bg-muted/30"
+                                            className="bg-muted/30 cursor-pointer hover:bg-muted/50"
+                                            onClick={() => handleWidthClick(kind, gsm, width)}
                                           >
                                             <TableCell className="pl-16">
                                               <span className="ml-6">

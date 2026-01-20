@@ -24,6 +24,10 @@ interface InventoryContextType {
   setAgingFilter: (filter: AgingFilter | null) => void;
   kindFilter: string | null;
   setKindFilter: (filter: string | null) => void;
+  gsmFilter: number | null;
+  setGsmFilter: (filter: number | null) => void;
+  widthFilter: number | null;
+  setWidthFilter: (filter: number | null) => void;
 }
 
 const InventoryContext = createContext<InventoryContextType | undefined>(
@@ -44,6 +48,8 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
 
   const [agingFilter, setAgingFilter] = useState<AgingFilter | null>(null);
   const [kindFilter, setKindFilter] = useState<string | null>(null);
+  const [gsmFilter, setGsmFilter] = useState<number | null>(null);
+  const [widthFilter, setWidthFilter] = useState<number | null>(null);
 
   // This function is kept for compatibility with the UploadDialog, but the actual
   // data persistence is now handled within the UploadDialog itself by writing to Firestore.
@@ -55,8 +61,22 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   const isLoading = isAuthLoading || (!!user && isCollectionLoading);
   const paperRolls = paperRollsFromFirestore || [];
 
+  const contextValue = {
+    paperRolls,
+    setPaperRolls,
+    isLoading,
+    agingFilter,
+    setAgingFilter,
+    kindFilter,
+    setKindFilter,
+    gsmFilter,
+    setGsmFilter,
+    widthFilter,
+    setWidthFilter,
+  };
+
   return (
-    <InventoryContext.Provider value={{ paperRolls, setPaperRolls, isLoading, agingFilter, setAgingFilter, kindFilter, setKindFilter }}>
+    <InventoryContext.Provider value={contextValue}>
       {children}
     </InventoryContext.Provider>
   );
