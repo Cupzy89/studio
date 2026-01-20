@@ -18,7 +18,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore } from '@/firebase';
-import { writeBatch, doc } from 'firebase/firestore';
+import { writeBatch, doc, getDocs, collection } from 'firebase/firestore';
 import * as XLSX from 'xlsx';
 import type { PaperRoll } from '@/lib/types';
 import { format, parse } from 'date-fns';
@@ -180,9 +180,7 @@ export function UploadDialog() {
           
           let idValue: string | number | null = keyMap.id ? row[keyMap.id] : null;
 
-          // Robust ID generation
           if (idValue === null || String(idValue).trim() === '') {
-             // Create a composite key if the primary ID is missing
              const compositeKey = Object.values(row).join('-') + `-${index}`;
               idValue = compositeKey;
           }
@@ -207,7 +205,27 @@ export function UploadDialog() {
             lastUpdated: new Date().toISOString(),
           };
         });
+        
+        // --- Start: Delete existing data ---
+        const rollsCollectionRef = collection(firestore, 'users', user.uid, 'rolls');
+        const existingRollsSnapshot = await getDocs(rollsCollectionRef);
 
+        if (!existingRollsSnapshot.empty) {
+          const deleteBatchSize = 499;
+          const deletePromises = [];
+          for (let i = 0; i < existingRollsSnapshot.docs.length; i += deleteBatchSize) {
+            const chunk = existingRollsSnapshot.docs.slice(i, i + deleteBatchSize);
+            const deleteBatch = writeBatch(firestore);
+            chunk.forEach(docSnapshot => {
+              deleteBatch.delete(docSnapshot.ref);
+            });
+            deletePromises.push(deleteBatch.commit());
+          }
+          await Promise.all(deletePromises);
+        }
+        // --- End: Delete existing data ---
+
+        // --- Start: Add new data ---
         const BATCH_SIZE = 499; // Firestore limit is 500
         const promises = [];
         for (let i = 0; i < newPaperRolls.length; i += BATCH_SIZE) {
@@ -215,15 +233,16 @@ export function UploadDialog() {
           const batch = writeBatch(firestore);
           chunk.forEach((roll) => {
             const rollRef = doc(firestore, 'users', user.uid, 'rolls', roll.id);
-            batch.set(rollRef, roll, { merge: true });
+            batch.set(rollRef, roll);
           });
           promises.push(batch.commit());
         }
         await Promise.all(promises);
+        // --- End: Add new data ---
 
         toast({
           title: 'Unggah Berhasil',
-          description: `${newPaperRolls.length} item inventaris telah berhasil dimuat ke akun Anda.`,
+          description: `Data lama dihapus. ${newPaperRolls.length} item inventaris baru telah dimuat.`,
         });
         setIsOpen(false);
       } catch (error) {
