@@ -49,7 +49,7 @@ export function UploadDialog() {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [clearData, setClearData] = useState(true);
+  const [clearData, setClearData] = useState(false);
 
   const handleDownloadTemplate = () => {
     const headers = [
@@ -310,11 +310,13 @@ export function UploadDialog() {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
-          <Alert>
+          <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Perhatian Kuota</AlertTitle>
+            <AlertTitle>Penting: Batasan Kuota Firestore</AlertTitle>
             <AlertDescription>
-              Operasi ini (terutama penghapusan data lama) dapat menghabiskan kuota harian Firestore Anda. Jika gagal, coba lagi tanpa mencentang opsi "Hapus semua data...".
+              Menghapus data lama menggunakan banyak kuota dan dapat menyebabkan kegagalan pada paket gratis. 
+              Secara default, data yang ada akan diperbarui dan data baru akan ditambahkan. 
+              Centang kotak di bawah hanya jika Anda ingin **menghapus semua data lama** sebelum mengunggah.
             </AlertDescription>
           </Alert>
           <div className="flex flex-col gap-4 rounded-lg border p-4">
