@@ -23,6 +23,7 @@ import * as XLSX from 'xlsx';
 import type { PaperRoll } from '@/lib/types';
 import { format, parse } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { Checkbox } from './ui/checkbox';
 
 // Function to convert Excel serial date to JS Date
 const excelDateToJSDate = (serial: number) => {
@@ -48,6 +49,7 @@ export function UploadDialog() {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [clearData, setClearData] = useState(true);
 
   const handleDownloadTemplate = () => {
     const headers = [
@@ -218,24 +220,30 @@ export function UploadDialog() {
           };
         });
         
-        // --- Start: Delete existing data ---
-        const rollsCollectionRef = collection(firestore, 'users', user.uid, 'rolls');
-        const existingRollsSnapshot = await getDocs(rollsCollectionRef);
+        if (clearData) {
+          // --- Start: Delete existing data ---
+          const rollsCollectionRef = collection(firestore, 'users', user.uid, 'rolls');
+          const existingRollsSnapshot = await getDocs(rollsCollectionRef);
 
-        if (!existingRollsSnapshot.empty) {
-          const deleteBatchSize = 499;
-          const deletePromises = [];
-          for (let i = 0; i < existingRollsSnapshot.docs.length; i += deleteBatchSize) {
-            const chunk = existingRollsSnapshot.docs.slice(i, i + deleteBatchSize);
-            const deleteBatch = writeBatch(firestore);
-            chunk.forEach(docSnapshot => {
-              deleteBatch.delete(docSnapshot.ref);
+          if (!existingRollsSnapshot.empty) {
+            toast({
+                title: 'Menghapus data lama...',
+                description: `Menghapus ${existingRollsSnapshot.docs.length} item.`,
             });
-            deletePromises.push(deleteBatch.commit());
+            const deleteBatchSize = 499;
+            const deletePromises = [];
+            for (let i = 0; i < existingRollsSnapshot.docs.length; i += deleteBatchSize) {
+              const chunk = existingRollsSnapshot.docs.slice(i, i + deleteBatchSize);
+              const deleteBatch = writeBatch(firestore);
+              chunk.forEach(docSnapshot => {
+                deleteBatch.delete(docSnapshot.ref);
+              });
+              deletePromises.push(deleteBatch.commit());
+            }
+            await Promise.all(deletePromises);
           }
-          await Promise.all(deletePromises);
+          // --- End: Delete existing data ---
         }
-        // --- End: Delete existing data ---
 
         // --- Start: Add new data ---
         const BATCH_SIZE = 499; // Firestore limit is 500
@@ -245,7 +253,7 @@ export function UploadDialog() {
           const batch = writeBatch(firestore);
           chunk.forEach((roll) => {
             const rollRef = doc(firestore, 'users', user.uid, 'rolls', roll.id);
-            batch.set(rollRef, roll);
+            batch.set(rollRef, roll, { merge: true }); // Use merge to update existing or create new
           });
           promises.push(batch.commit());
         }
@@ -254,16 +262,14 @@ export function UploadDialog() {
 
         toast({
           title: 'Unggah Berhasil',
-          description: `Data lama dihapus. ${newPaperRolls.length} item inventaris baru telah dimuat.`,
+          description: `${clearData ? 'Data lama dihapus. ' : ''}${newPaperRolls.length} item inventaris baru telah dimuat.`,
         });
         setIsOpen(false);
       } catch (error: any) {
-        console.error("Gagal mem-parsing atau mengunggah file:", error);
-        
         let description = `Gagal mem-parsing atau menyimpan file. Pastikan formatnya benar. Error: ${error.message || String(error)}`;
 
         if (error?.code === 'resource-exhausted') {
-            description = 'Operasi gagal karena kuota Firestore Anda terlampaui. Ini sering terjadi saat mengunggah file besar. Harap coba lagi nanti atau pertimbangkan untuk meningkatkan paket Firebase Anda.';
+            description = 'Operasi gagal karena kuota Firestore Anda terlampaui. Coba lagi tanpa mencentang opsi "Hapus semua data...".';
         }
 
         toast({
@@ -278,7 +284,6 @@ export function UploadDialog() {
     };
 
     reader.onerror = () => {
-        console.error("Gagal membaca file:", reader.error);
         toast({
             variant: 'destructive',
             title: 'Gagal Membaca File',
@@ -307,9 +312,9 @@ export function UploadDialog() {
         <div className="grid gap-6 py-4">
           <Alert>
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Perhatian</AlertTitle>
+            <AlertTitle>Perhatian Kuota</AlertTitle>
             <AlertDescription>
-              Mengunggah file besar akan memakai kuota Firestore Anda secara signifikan. Jika unggahan gagal, kemungkinan kuota Anda telah habis.
+              Operasi ini (terutama penghapusan data lama) dapat menghabiskan kuota harian Firestore Anda. Jika gagal, coba lagi tanpa mencentang opsi "Hapus semua data...".
             </AlertDescription>
           </Alert>
           <div className="flex flex-col gap-4 rounded-lg border p-4">
@@ -339,6 +344,12 @@ export function UploadDialog() {
             <p className="text-xs text-muted-foreground">
               Mendukung file .xlsx, .csv hingga 5MB.
             </p>
+          </div>
+           <div className="flex items-center space-x-2">
+            <Checkbox id="clear-data" checked={clearData} onCheckedChange={(checked) => setClearData(checked as boolean)} />
+            <Label htmlFor="clear-data" className="text-sm font-normal cursor-pointer">
+              Hapus semua data inventaris sebelum mengunggah.
+            </Label>
           </div>
         </div>
         <DialogFooter>
