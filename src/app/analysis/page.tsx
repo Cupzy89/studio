@@ -1,7 +1,8 @@
 'use client';
 
 import { useInventory, type AgingFilter } from '@/context/inventory-context';
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -18,65 +19,157 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { KindBreakdownDialog } from '@/components/kind-breakdown-dialog';
+import { ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+
+// Define the structure for nested statistics
+interface WidthStats {
+  rolls: number;
+  weight: number;
+}
+interface GsmStats {
+  rolls: number;
+  weight: number;
+  widths: Record<string, WidthStats>;
+}
+interface KindStats {
+  rolls: number;
+  weight: number;
+  gsms: Record<string, GsmStats>;
+}
+interface AgingCategoryStats {
+  rolls: number;
+  weight: number;
+  kinds: Record<string, KindStats>;
+}
+type NestedStats = Record<string, AgingCategoryStats>;
+
 
 export default function AnalysisPage() {
-  const { paperRolls, isLoading } = useInventory();
-  const [selectedFilter, setSelectedFilter] = useState<AgingFilter | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { 
+    paperRolls, 
+    isLoading,
+    setAgingFilter,
+    setKindFilter,
+    setGsmFilter,
+    setWidthFilter,
+  } = useInventory();
+  const router = useRouter();
 
-  const agingStats = useMemo(() => {
+  // State for expanded rows
+  const [expandedAging, setExpandedAging] = useState<Set<string>>(new Set());
+  const [expandedKinds, setExpandedKinds] = useState<Set<string>>(new Set());
+  const [expandedGsms, setExpandedGsms] = useState<Set<string>>(new Set());
+
+  const toggleAging = (key: string) => {
+    setExpandedAging(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(key)) {
+        newSet.delete(key);
+      } else {
+        newSet.add(key);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleKind = (key: string) => {
+    setExpandedKinds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(key)) {
+        newSet.delete(key);
+      } else {
+        newSet.add(key);
+      }
+      return newSet;
+    });
+  };
+  
+  const toggleGsm = (key: string) => {
+    setExpandedGsms(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(key)) {
+        newSet.delete(key);
+      } else {
+        newSet.add(key);
+      }
+      return newSet;
+    });
+  };
+
+  const handleWidthClick = (agingFilter: AgingFilter, kind: string, gsm: string, width: string) => {
+    setAgingFilter(agingFilter);
+    setKindFilter(kind);
+    setGsmFilter(Number(gsm));
+    setWidthFilter(Number(width));
+    router.push('/inventory');
+  };
+
+  const nestedStats = useMemo(() => {
     if (isLoading || !paperRolls) {
-      return {
-        under3: { rolls: 0, weight: 0 },
-        '3to6': { rolls: 0, weight: 0 },
-        '6to12': { rolls: 0, weight: 0 },
-        over12: { rolls: 0, weight: 0 },
-      };
+      return {};
     }
 
-    const categories = {
-      under3: { rolls: 0, weight: 0 },
-      '3to6': { rolls: 0, weight: 0 },
-      '6to12': { rolls: 0, weight: 0 },
-      over12: { rolls: 0, weight: 0 },
+    const stats: NestedStats = {
+      under3: { rolls: 0, weight: 0, kinds: {} },
+      '3to6': { rolls: 0, weight: 0, kinds: {} },
+      '6to12': { rolls: 0, weight: 0, kinds: {} },
+      over12: { rolls: 0, weight: 0, kinds: {} },
     };
 
     paperRolls.forEach(roll => {
+      let categoryKey: keyof NestedStats;
       const agingDays = roll.aging;
-      if (agingDays < 90) {
-        categories.under3.rolls += roll.rollCount;
-        categories.under3.weight += roll.quantity;
-      } else if (agingDays >= 90 && agingDays < 180) {
-        categories['3to6'].rolls += roll.rollCount;
-        categories['3to6'].weight += roll.quantity;
-      } else if (agingDays >= 180 && agingDays < 365) {
-        categories['6to12'].rolls += roll.rollCount;
-        categories['6to12'].weight += roll.quantity;
-      } else {
-        categories.over12.rolls += roll.rollCount;
-        categories.over12.weight += roll.quantity;
+      if (agingDays < 90) categoryKey = 'under3';
+      else if (agingDays < 180) categoryKey = '3to6';
+      else if (agingDays < 365) categoryKey = '6to12';
+      else categoryKey = 'over12';
+
+      const kind = roll.type || 'Tidak Diketahui';
+      const gsm = String(roll.gsm || 'N/A');
+      const width = String(roll.width || 'N/A');
+
+      const category = stats[categoryKey];
+      category.rolls += roll.rollCount;
+      category.weight += roll.quantity;
+
+      if (!category.kinds[kind]) {
+        category.kinds[kind] = { rolls: 0, weight: 0, gsms: {} };
       }
+      const kindStat = category.kinds[kind];
+      kindStat.rolls += roll.rollCount;
+      kindStat.weight += roll.quantity;
+      
+      if (!kindStat.gsms[gsm]) {
+        kindStat.gsms[gsm] = { rolls: 0, weight: 0, widths: {} };
+      }
+      const gsmStat = kindStat.gsms[gsm];
+      gsmStat.rolls += roll.rollCount;
+      gsmStat.weight += roll.quantity;
+
+      if (!gsmStat.widths[width]) {
+        gsmStat.widths[width] = { rolls: 0, weight: 0 };
+      }
+      const widthStat = gsmStat.widths[width];
+      widthStat.rolls += roll.rollCount;
+      widthStat.weight += roll.quantity;
     });
 
-    return categories;
+    return stats;
   }, [paperRolls, isLoading]);
 
   const agingData: {
+    key: string;
     category: string;
-    stats: { rolls: number; weight: number };
+    stats: AgingCategoryStats;
     filter: AgingFilter;
   }[] = [
-    { category: 'Di Bawah 3 Bulan', stats: agingStats.under3, filter: { min: 0, max: 89, label: 'Di Bawah 3 Bulan' } },
-    { category: '3-6 Bulan', stats: agingStats['3to6'], filter: { min: 90, max: 179, label: '3-6 Bulan' } },
-    { category: '6-12 Bulan', stats: agingStats['6to12'], filter: { min: 180, max: 364, label: '6-12 Bulan' } },
-    { category: 'Di Atas 12 Bulan', stats: agingStats.over12, filter: { min: 365, max: null, label: 'Di Atas 12 Bulan' } },
+    { key: 'under3', category: 'Di Bawah 3 Bulan', stats: nestedStats.under3, filter: { min: 0, max: 89, label: 'Di Bawah 3 Bulan' } },
+    { key: '3to6', category: '3-6 Bulan', stats: nestedStats['3to6'], filter: { min: 90, max: 179, label: '3-6 Bulan' } },
+    { key: '6to12', category: '6-12 Bulan', stats: nestedStats['6to12'], filter: { min: 180, max: 364, label: '6-12 Bulan' } },
+    { key: 'over12', category: 'Di Atas 12 Bulan', stats: nestedStats.over12, filter: { min: 365, max: null, label: 'Di Atas 12 Bulan' } },
   ];
-
-  const handleRowClick = (filter: AgingFilter) => {
-    setSelectedFilter(filter);
-    setIsDialogOpen(true);
-  };
 
   return (
     <div className="space-y-6">
@@ -85,14 +178,14 @@ export default function AnalysisPage() {
         <CardHeader>
           <CardTitle>Rangkuman Usia Stok</CardTitle>
           <CardDescription>
-            Tabel rincian jumlah gulungan dan berat berdasarkan kategori usia. Klik baris untuk melihat rincian per jenis.
+            Tabel rincian jumlah gulungan dan berat berdasarkan kategori usia. Klik baris untuk melihat rincian.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Kategori Usia</TableHead>
+                <TableHead>Rincian</TableHead>
                 <TableHead className="text-right">Jumlah Gulungan</TableHead>
                 <TableHead className="text-right">Total Berat (kg)</TableHead>
               </TableRow>
@@ -102,7 +195,7 @@ export default function AnalysisPage() {
                 Array.from({ length: 4 }).map((_, index) => (
                   <TableRow key={index}>
                     <TableCell>
-                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-4 w-32" />
                     </TableCell>
                     <TableCell>
                       <Skeleton className="h-4 w-20 float-right" />
@@ -113,29 +206,95 @@ export default function AnalysisPage() {
                   </TableRow>
                 ))
               ) : (
-                agingData.map(item => (
-                  <TableRow key={item.category} onClick={() => handleRowClick(item.filter)} className="cursor-pointer hover:bg-muted">
-                    <TableCell className="font-medium">{item.category}</TableCell>
-                    <TableCell className="text-right font-mono">
-                      {item.stats.rolls.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-right font-mono">
-                      {item.stats.weight.toLocaleString(undefined, {
-                        maximumFractionDigits: 0,
-                      })}
-                    </TableCell>
-                  </TableRow>
+                agingData.map(agingItem => (
+                  <React.Fragment key={agingItem.key}>
+                    <TableRow onClick={() => toggleAging(agingItem.key)} className="cursor-pointer hover:bg-muted/80">
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                           <ChevronDown
+                              className={cn(
+                                'h-4 w-4 transform transition-transform',
+                                expandedAging.has(agingItem.key) && 'rotate-180'
+                              )}
+                            />
+                          {agingItem.category}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        {agingItem.stats.rolls.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        {agingItem.stats.weight.toLocaleString(undefined, {
+                          maximumFractionDigits: 0,
+                        })}
+                      </TableCell>
+                    </TableRow>
+                    {expandedAging.has(agingItem.key) && Object.entries(agingItem.stats.kinds).sort(([,a], [,b]) => b.weight - a.weight).map(([kindName, kindStats]) => {
+                      const kindKey = `${agingItem.key}-${kindName}`;
+                      const isKindExpanded = expandedKinds.has(kindKey);
+                      return (
+                        <React.Fragment key={kindKey}>
+                          <TableRow onClick={() => toggleKind(kindKey)} className="cursor-pointer bg-muted/50 hover:bg-muted/80">
+                            <TableCell className="pl-8 font-medium">
+                               <div className="flex items-center gap-2">
+                                <ChevronDown
+                                  className={cn(
+                                    'h-4 w-4 transform transition-transform',
+                                    isKindExpanded && 'rotate-180'
+                                  )}
+                                />
+                                {kindName}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right font-mono">{kindStats.rolls.toLocaleString()}</TableCell>
+                            <TableCell className="text-right font-mono">{kindStats.weight.toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
+                          </TableRow>
+                          {isKindExpanded && Object.entries(kindStats.gsms).sort(([gsmA], [gsmB]) => Number(gsmB) - Number(gsmA)).map(([gsmValue, gsmStats]) => {
+                            const gsmKey = `${kindKey}-${gsmValue}`;
+                            const isGsmExpanded = expandedGsms.has(gsmKey);
+                            return (
+                              <React.Fragment key={gsmKey}>
+                                <TableRow onClick={() => toggleGsm(gsmKey)} className="cursor-pointer bg-muted/30 hover:bg-muted/50">
+                                  <TableCell className="pl-16 font-medium">
+                                    <div className="flex items-center gap-2">
+                                      <ChevronDown
+                                        className={cn(
+                                          'h-4 w-4 transform transition-transform',
+                                          isGsmExpanded && 'rotate-180'
+                                        )}
+                                      />
+                                      <span>GSM: {gsmValue}</span>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="text-right font-mono">{gsmStats.rolls.toLocaleString()}</TableCell>
+                                  <TableCell className="text-right font-mono">{gsmStats.weight.toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
+                                </TableRow>
+                                {isGsmExpanded && Object.entries(gsmStats.widths).sort(([widthA], [widthB]) => Number(widthB) - Number(widthA)).map(([widthValue, widthStats]) => (
+                                  <TableRow 
+                                    key={`${gsmKey}-${widthValue}`} 
+                                    onClick={() => handleWidthClick(agingItem.filter, kindName, gsmValue, widthValue)}
+                                    className="cursor-pointer bg-muted/20 hover:bg-muted/40"
+                                  >
+                                    <TableCell className="pl-24">
+                                       <span className="ml-6">Width: {widthValue}</span>
+                                    </TableCell>
+                                    <TableCell className="text-right font-mono">{widthStats.rolls.toLocaleString()}</TableCell>
+                                    <TableCell className="text-right font-mono">{widthStats.weight.toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
+                                  </TableRow>
+                                ))}
+                              </React.Fragment>
+                            )
+                          })}
+                        </React.Fragment>
+                      )
+                    })}
+                  </React.Fragment>
                 ))
               )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
-      <KindBreakdownDialog 
-        isOpen={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        agingFilter={selectedFilter}
-      />
     </div>
   );
 }
