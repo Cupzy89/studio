@@ -262,6 +262,11 @@ export function InventoryTable() {
                   </Button>
                 </TableHead>
                 <TableHead>
+                  <Button variant="ghost" onClick={() => requestSort('id')} className="px-1 py-1 h-auto -ml-2">
+                    SU No {getSortIcon('id')}
+                  </Button>
+                </TableHead>
+                <TableHead>
                     <div className="flex items-center -ml-2">
                       <Button variant="ghost" onClick={() => requestSort('type')} className="px-1 py-1 h-auto">
                         Kind {getSortIcon('type')}
@@ -334,6 +339,7 @@ export function InventoryTable() {
                   <TableRow key={`skeleton-row-${index}`}>
                     <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-12" /></TableCell>
@@ -348,6 +354,7 @@ export function InventoryTable() {
                 sortedAndFilteredRolls.map((roll) => (
                   <TableRow key={roll.id}>
                     <TableCell className="font-medium">{roll.name}</TableCell>
+                    <TableCell>{roll.id}</TableCell>
                     <TableCell>{roll.type}</TableCell>
                     <TableCell>{roll.grDate}</TableCell>
                     <TableCell>{roll.gsm}</TableCell>
@@ -361,7 +368,7 @@ export function InventoryTable() {
                 ))
               ) : (
                   <TableRow>
-                      <TableCell colSpan={10} className="h-24 text-center">
+                      <TableCell colSpan={11} className="h-24 text-center">
                           Tidak ada hasil yang ditemukan.
                       </TableCell>
                   </TableRow>
