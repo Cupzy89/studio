@@ -154,30 +154,39 @@ export function UploadDialog() {
         const newPaperRolls: PaperRoll[] = json.map((row: any, index: number) => {
           let grDateStr = 'N/A';
           const grDateValue = keyMap.grDate ? row[keyMap.grDate] : null;
+          
           if (grDateValue) {
             if (grDateValue instanceof Date) {
               grDateStr = format(grDateValue, 'yyyy-MM-dd');
-            } 
-            else if (typeof grDateValue === 'number') {
+            } else if (typeof grDateValue === 'number') {
               grDateStr = format(excelDateToJSDate(grDateValue), 'yyyy-MM-dd');
-            }
-            else if (typeof grDateValue === 'string') {
-              try {
-                 const parsedDate = parse(grDateValue, 'MM/dd/yy', new Date());
-                 if(!isNaN(parsedDate.getTime())) {
-                   grDateStr = format(parsedDate, 'yyyy-MM-dd');
-                 } else {
-                    const parsedDate2 = parse(grDateValue, 'dd-MM-yyyy', new Date());
-                    if (!isNaN(parsedDate2.getTime())) {
-                      grDateStr = format(parsedDate2, 'yyyy-MM-dd');
-                    } else {
-                      grDateStr = grDateValue;
-                    }
-                 }
-              } catch (dateError) {
-                console.warn(`Could not parse date for row ${index + 2}:`, grDateValue);
-                grDateStr = String(grDateValue);
+            } else if (typeof grDateValue === 'string') {
+              const formatsToTry = [
+                'MM/dd/yy',
+                'dd-MM-yyyy',
+                'yyyy-MM-dd',
+                'M/d/yy',
+                'd-M-yyyy',
+                'MM/dd/yyyy',
+                'd/M/yyyy',
+              ];
+              let parsedDate: Date | null = null;
+              for (const fmt of formatsToTry) {
+                const d = parse(grDateValue, fmt, new Date());
+                if (!isNaN(d.getTime())) {
+                  parsedDate = d;
+                  break;
+                }
               }
+
+              if (parsedDate) {
+                grDateStr = format(parsedDate, 'yyyy-MM-dd');
+              } else {
+                console.warn(`Could not parse date string for row ${index + 2}:`, grDateValue);
+                grDateStr = String(grDateValue); // Fallback
+              }
+            } else if (grDateValue) {
+                grDateStr = String(grDateValue);
             }
           }
           
