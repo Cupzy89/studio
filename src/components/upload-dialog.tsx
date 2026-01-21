@@ -314,9 +314,7 @@ export function UploadDialog() {
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Penting: Batasan Kuota Firestore</AlertTitle>
             <AlertDescription>
-              Menghapus data lama menggunakan banyak kuota dan dapat menyebabkan kegagalan pada paket gratis. 
-              Secara default, data yang ada akan diperbarui dan data baru akan ditambahkan. 
-              Centang kotak di bawah hanya jika Anda ingin **menghapus semua data lama** sebelum mengunggah.
+              Secara default, data yang ada akan diperbarui dan data baru akan ditambahkan. Mencentang kotak di bawah akan <strong>menghapus semua data lama</strong> sebelum mengunggah, yang menggunakan banyak kuota dan dapat menyebabkan kegagalan pada paket gratis.
             </AlertDescription>
           </Alert>
           <div className="flex flex-col gap-4 rounded-lg border p-4">
