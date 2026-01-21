@@ -279,7 +279,7 @@ export function InventoryTable() {
                       />
                     </div>
                 </TableHead>
-                <TableHead>
+                <TableHead className="hidden md:table-cell">
                   <Button variant="ghost" onClick={() => requestSort('grDate')} className="px-1 py-1 h-auto -ml-2">
                     GR Date {getSortIcon('grDate')}
                   </Button>
@@ -294,7 +294,7 @@ export function InventoryTable() {
                     Width {getSortIcon('width')}
                   </Button>
                 </TableHead>
-                 <TableHead>
+                 <TableHead className="hidden md:table-cell">
                   <Button variant="ghost" onClick={() => requestSort('length')} className="px-1 py-1 h-auto -ml-2">
                     Length {getSortIcon('length')}
                   </Button>
@@ -318,7 +318,7 @@ export function InventoryTable() {
                       </Button>
                    </div>
                 </TableHead>
-                <TableHead>
+                <TableHead className="hidden md:table-cell">
                     <div className="flex items-center -ml-2">
                       <Button variant="ghost" onClick={() => requestSort('storageBin')} className="px-1 py-1 h-auto">
                         Storage Bin {getSortIcon('storageBin')}
@@ -340,14 +340,14 @@ export function InventoryTable() {
                     <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                    <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-12" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                    <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-12" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-20 float-right" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-12 float-right" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-16" /></TableCell>
                   </TableRow>
                 ))
               ) : sortedAndFilteredRolls.length > 0 ? (
@@ -356,14 +356,14 @@ export function InventoryTable() {
                     <TableCell className="font-medium">{roll.name}</TableCell>
                     <TableCell>{roll.id}</TableCell>
                     <TableCell>{roll.type}</TableCell>
-                    <TableCell>{roll.grDate}</TableCell>
+                    <TableCell className="hidden md:table-cell">{roll.grDate}</TableCell>
                     <TableCell>{roll.gsm}</TableCell>
                     <TableCell>{roll.width}</TableCell>
-                    <TableCell>{roll.length}</TableCell>
+                    <TableCell className="hidden md:table-cell">{roll.length}</TableCell>
                     <TableCell>{roll.aging}</TableCell>
                     <TableCell className="text-right font-mono">{roll.quantity.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 })}</TableCell>
                     <TableCell className="text-right font-mono">{roll.rollCount}</TableCell>
-                    <TableCell>{roll.storageBin}</TableCell>
+                    <TableCell className="hidden md:table-cell">{roll.storageBin}</TableCell>
                   </TableRow>
                 ))
               ) : (
