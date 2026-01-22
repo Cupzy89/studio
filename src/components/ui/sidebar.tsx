@@ -33,8 +33,9 @@ type SidebarContext = {
   setOpen: (open: boolean) => void
   openMobile: boolean
   setOpenMobile: (open: boolean) => void
-  isMobile: boolean
+  isMobile: boolean | null
   toggleSidebar: () => void
+  isReady: boolean
 }
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
@@ -70,6 +71,13 @@ const SidebarProvider = React.forwardRef<
   ) => {
     const isMobile = useIsMobile()
     const [openMobile, setOpenMobile] = React.useState(false)
+    const [isReady, setIsReady] = React.useState(false)
+
+    React.useEffect(() => {
+      if (isMobile !== null) {
+        setIsReady(true)
+      }
+    }, [isMobile])
 
     // This is the internal state of the sidebar.
     // We use openProp and setOpenProp for control from outside the component.
@@ -92,10 +100,11 @@ const SidebarProvider = React.forwardRef<
 
     // Helper to toggle the sidebar.
     const toggleSidebar = React.useCallback(() => {
+      if (!isReady) return;
       return isMobile
         ? setOpenMobile((open) => !open)
         : setOpen((open) => !open)
-    }, [isMobile, setOpen, setOpenMobile])
+    }, [isMobile, isReady, setOpen, setOpenMobile])
 
     // Adds a keyboard shortcut to toggle the sidebar.
     React.useEffect(() => {
@@ -126,8 +135,9 @@ const SidebarProvider = React.forwardRef<
         openMobile,
         setOpenMobile,
         toggleSidebar,
+        isReady,
       }),
-      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, isReady]
     )
 
     return (
@@ -176,7 +186,29 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const { isMobile, isReady, state, openMobile, setOpenMobile } = useSidebar()
+
+    if (!isReady) {
+      // Render a placeholder on the server and initial client render to avoid hydration errors.
+      // The desktop version is hidden on mobile via CSS anyway.
+      return (
+        <div
+          ref={ref}
+          className="group peer hidden md:block text-sidebar-foreground"
+          data-state="collapsed"
+          data-collapsible="icon"
+          data-variant="sidebar"
+          data-side="left"
+        >
+          <div
+            className={cn(
+              "duration-200 relative h-svh w-[--sidebar-width] bg-transparent transition-[width] ease-linear",
+              "group-data-[collapsible=icon]:w-[--sidebar-width-icon]"
+            )}
+          />
+        </div>
+      );
+    }
 
     if (collapsible === "none") {
       return (
@@ -584,7 +616,7 @@ const SidebarMenuButton = React.forwardRef<
         <TooltipContent
           side="right"
           align="center"
-          hidden={state !== "collapsed" || isMobile}
+          hidden={state !== "collapsed" || !!isMobile}
           {...tooltip}
         />
       </Tooltip>
